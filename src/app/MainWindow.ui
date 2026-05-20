@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="windowTitle">
+   <string>DefectDataGenerator</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="projectButtonLayout">
+      <item>
+       <widget class="QPushButton" name="newProjectButton">
+        <property name="text">
+         <string>New Project</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="openProjectButton">
+        <property name="text">
+         <string>Open Project</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="importOkButton">
+        <property name="text">
+         <string>Import OK Images</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="importDefectButton">
+        <property name="text">
+         <string>Import Defect Sources</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="projectButtonSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="mainLayout">
+      <item>
+       <widget class="QTabWidget" name="leftTabs">
+        <property name="minimumSize">
+         <size>
+          <width>260</width>
+          <height>0</height>
+         </size>
+        </property>
+        <widget class="QWidget" name="okTab">
+         <attribute name="title">
+          <string>OK Images</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="okTabLayout">
+          <item>
+           <widget class="QListView" name="okListView"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="defectTab">
+         <attribute name="title">
+          <string>Defect Sources</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="defectTabLayout">
+          <item>
+           <widget class="QListView" name="defectListView"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="assetTab">
+         <attribute name="title">
+          <string>Assets</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="assetTabLayout">
+          <item>
+           <widget class="QListView" name="assetListView"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="generatedTab">
+         <attribute name="title">
+          <string>Generated</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="generatedTabLayout">
+          <item>
+           <widget class="QListView" name="generatedListView"/>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="ImageView" name="imageView">
+        <property name="minimumSize">
+         <size>
+          <width>620</width>
+          <height>480</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="rightPanel">
+        <property name="minimumSize">
+         <size>
+          <width>300</width>
+          <height>0</height>
+         </size>
+        </property>
+        <layout class="QVBoxLayout" name="rightPanelLayout">
+         <item>
+          <widget class="QGroupBox" name="annotationGroup">
+           <property name="title">
+            <string>Annotation</string>
+           </property>
+           <layout class="QGridLayout" name="annotationLayout">
+            <item row="0" column="0">
+             <widget class="QPushButton" name="viewButton">
+              <property name="text">
+               <string>View</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="rectButton">
+              <property name="text">
+               <string>Rect</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="polygonButton">
+              <property name="text">
+               <string>Polygon</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="brushButton">
+              <property name="text">
+               <string>Brush</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QPushButton" name="eraserButton">
+              <property name="text">
+               <string>Eraser</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QPushButton" name="clearMaskButton">
+              <property name="text">
+               <string>Clear</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" colspan="2">
+             <widget class="QSpinBox" name="brushSizeSpin">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>128</number>
+              </property>
+              <property name="value">
+               <number>16</number>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0" colspan="2">
+             <widget class="QLineEdit" name="defectTypeEdit">
+              <property name="placeholderText">
+               <string>defect type</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0" colspan="2">
+             <widget class="QPushButton" name="saveAssetButton">
+              <property name="text">
+               <string>Save Defect Asset</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="generateGroup">
+           <property name="title">
+            <string>Generate</string>
+           </property>
+           <layout class="QFormLayout" name="generateLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="countLabel">
+              <property name="text">
+               <string>Count</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="countSpin">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>10000</number>
+              </property>
+              <property name="value">
+               <number>10</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="defectMinLabel">
+              <property name="text">
+               <string>Defects min</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="defectMinSpin">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>20</number>
+              </property>
+              <property name="value">
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="defectMaxLabel">
+              <property name="text">
+               <string>Defects max</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QSpinBox" name="defectMaxSpin">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>20</number>
+              </property>
+              <property name="value">
+               <number>3</number>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="seedLabel">
+              <property name="text">
+               <string>Seed</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QSpinBox" name="seedSpin">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>2147483647</number>
+              </property>
+              <property name="value">
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="generateTypeLabel">
+              <property name="text">
+               <string>Defect type</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QComboBox" name="generateTypeCombo"/>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="scaleMinLabel">
+              <property name="text">
+               <string>Scale min</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QDoubleSpinBox" name="scaleMinSpin">
+              <property name="minimum">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>10.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="value">
+               <double>0.600000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="scaleMaxLabel">
+              <property name="text">
+               <string>Scale max</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QDoubleSpinBox" name="scaleMaxSpin">
+              <property name="minimum">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>10.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.400000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="rotationMinLabel">
+              <property name="text">
+               <string>Rotation min</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1">
+             <widget class="QSpinBox" name="rotationMinSpin">
+              <property name="minimum">
+               <number>-180</number>
+              </property>
+              <property name="maximum">
+               <number>180</number>
+              </property>
+              <property name="value">
+               <number>-30</number>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0">
+             <widget class="QLabel" name="rotationMaxLabel">
+              <property name="text">
+               <string>Rotation max</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1">
+             <widget class="QSpinBox" name="rotationMaxSpin">
+              <property name="minimum">
+               <number>-180</number>
+              </property>
+              <property name="maximum">
+               <number>180</number>
+              </property>
+              <property name="value">
+               <number>30</number>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0">
+             <widget class="QLabel" name="brightnessMinLabel">
+              <property name="text">
+               <string>Brightness min</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1">
+             <widget class="QSpinBox" name="brightnessMinSpin">
+              <property name="minimum">
+               <number>-255</number>
+              </property>
+              <property name="maximum">
+               <number>255</number>
+              </property>
+              <property name="value">
+               <number>-15</number>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="0">
+             <widget class="QLabel" name="brightnessMaxLabel">
+              <property name="text">
+               <string>Brightness max</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1">
+             <widget class="QSpinBox" name="brightnessMaxSpin">
+              <property name="minimum">
+               <number>-255</number>
+              </property>
+              <property name="maximum">
+               <number>255</number>
+              </property>
+              <property name="value">
+               <number>15</number>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="0">
+             <widget class="QLabel" name="featherMinLabel">
+              <property name="text">
+               <string>Feather min</string>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="1">
+             <widget class="QSpinBox" name="featherMinSpin">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>101</number>
+              </property>
+              <property name="value">
+               <number>3</number>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="0">
+             <widget class="QLabel" name="featherMaxLabel">
+              <property name="text">
+               <string>Feather max</string>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="1">
+             <widget class="QSpinBox" name="featherMaxSpin">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>101</number>
+              </property>
+              <property name="value">
+               <number>15</number>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="0" colspan="2">
+             <widget class="QPushButton" name="generateButton">
+              <property name="text">
+               <string>Generate OpenCV</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="reviewGroup">
+           <property name="title">
+            <string>Review</string>
+           </property>
+           <layout class="QHBoxLayout" name="reviewLayout">
+            <item>
+             <widget class="QPushButton" name="approveButton">
+              <property name="text">
+               <string>Approve</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="rejectButton">
+              <property name="text">
+               <string>Reject</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="exportButton">
+           <property name="text">
+            <string>Export Approved Dataset</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="rightSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QPlainTextEdit" name="logEdit">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>160</height>
+       </size>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <widget class="QMenu" name="fileMenu">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="newProjectAction"/>
+    <addaction name="openProjectAction"/>
+    <addaction name="importOkAction"/>
+    <addaction name="importDefectAction"/>
+   </widget>
+   <addaction name="fileMenu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="newProjectAction">
+   <property name="text">
+    <string>New Project</string>
+   </property>
+  </action>
+  <action name="openProjectAction">
+   <property name="text">
+    <string>Open Project</string>
+   </property>
+  </action>
+  <action name="importOkAction">
+   <property name="text">
+    <string>Import OK Images</string>
+   </property>
+  </action>
+  <action name="importDefectAction">
+   <property name="text">
+    <string>Import Defect Sources</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ImageView</class>
+   <extends>QGraphicsView</extends>
+   <header>ui/ImageView.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
