@@ -14,6 +14,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMenu>
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QStandardPaths>
@@ -30,6 +31,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->defectListView->setModel(&m_defectModel);
     ui->assetListView->setModel(&m_assetModel);
     ui->generatedListView->setModel(&m_generatedModel);
+    ui->okListView->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->defectListView->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->assetListView->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->generatedListView->setContextMenuPolicy(Qt::CustomContextMenu);
     setupConnections();
     connect(&Logger::instance(), &Logger::messageLogged, this, &MainWindow::appendLog);
     appendLog(QStringLiteral("Ready."));
@@ -46,10 +51,6 @@ void MainWindow::setupConnections()
     connect(ui->openProjectAction, &QAction::triggered, this, &MainWindow::openProject);
     connect(ui->importOkAction, &QAction::triggered, this, &MainWindow::importOkImages);
     connect(ui->importDefectAction, &QAction::triggered, this, &MainWindow::importDefectImages);
-    connect(ui->newProjectButton, &QPushButton::clicked, this, &MainWindow::newProject);
-    connect(ui->openProjectButton, &QPushButton::clicked, this, &MainWindow::openProject);
-    connect(ui->importOkButton, &QPushButton::clicked, this, &MainWindow::importOkImages);
-    connect(ui->importDefectButton, &QPushButton::clicked, this, &MainWindow::importDefectImages);
     connect(ui->saveAssetButton, &QPushButton::clicked, this, &MainWindow::saveCurrentMaskAsAsset);
     connect(ui->generateButton, &QPushButton::clicked, this, &MainWindow::generateImages);
     connect(ui->approveButton, &QPushButton::clicked, this, &MainWindow::approveSelectedGenerated);
@@ -68,6 +69,10 @@ void MainWindow::setupConnections()
     connect(ui->okListView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::onOkImageSelected);
     connect(ui->defectListView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::onDefectSourceSelected);
     connect(ui->generatedListView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::onGeneratedSelected);
+    connect(ui->okListView, &QListView::customContextMenuRequested, this, &MainWindow::showOkContextMenu);
+    connect(ui->defectListView, &QListView::customContextMenuRequested, this, &MainWindow::showDefectSourceContextMenu);
+    connect(ui->assetListView, &QListView::customContextMenuRequested, this, &MainWindow::showAssetContextMenu);
+    connect(ui->generatedListView, &QListView::customContextMenuRequested, this, &MainWindow::showGeneratedContextMenu);
 }
 
 void MainWindow::newProject()
@@ -405,6 +410,260 @@ void MainWindow::onGeneratedSelected()
     }
 }
 
+void MainWindow::showOkContextMenu(const QPoint &pos)
+{
+    if (!ensureProjectLoaded()) {
+        return;
+    }
+    const QModelIndex index = ui->okListView->indexAt(pos);
+    if (index.isValid()) {
+        ui->okListView->setCurrentIndex(index);
+    }
+    QMenu menu(this);
+    QAction *deleteAction = menu.addAction(QStringLiteral("Delete Selected"));
+    deleteAction->setEnabled(ui->okListView->currentIndex().isValid());
+    QAction *clearAction = menu.addAction(QStringLiteral("Clear All"));
+    clearAction->setEnabled(!m_project.okImages.isEmpty());
+    QAction *chosen = menu.exec(ui->okListView->viewport()->mapToGlobal(pos));
+    if (chosen == deleteAction) {
+        deleteSelectedOkImage();
+    } else if (chosen == clearAction) {
+        clearOkImages();
+    }
+}
+
+void MainWindow::showDefectSourceContextMenu(const QPoint &pos)
+{
+    if (!ensureProjectLoaded()) {
+        return;
+    }
+    const QModelIndex index = ui->defectListView->indexAt(pos);
+    if (index.isValid()) {
+        ui->defectListView->setCurrentIndex(index);
+    }
+    QMenu menu(this);
+    QAction *deleteAction = menu.addAction(QStringLiteral("Delete Selected"));
+    deleteAction->setEnabled(ui->defectListView->currentIndex().isValid());
+    QAction *clearAction = menu.addAction(QStringLiteral("Clear All"));
+    clearAction->setEnabled(!m_defectModel.stringList().isEmpty());
+    QAction *chosen = menu.exec(ui->defectListView->viewport()->mapToGlobal(pos));
+    if (chosen == deleteAction) {
+        deleteSelectedDefectSource();
+    } else if (chosen == clearAction) {
+        clearDefectSources();
+    }
+}
+
+void MainWindow::showAssetContextMenu(const QPoint &pos)
+{
+    if (!ensureProjectLoaded()) {
+        return;
+    }
+    const QModelIndex index = ui->assetListView->indexAt(pos);
+    if (index.isValid()) {
+        ui->assetListView->setCurrentIndex(index);
+    }
+    QMenu menu(this);
+    QAction *deleteAction = menu.addAction(QStringLiteral("Delete Selected"));
+    deleteAction->setEnabled(ui->assetListView->currentIndex().isValid());
+    QAction *clearAction = menu.addAction(QStringLiteral("Clear All"));
+    clearAction->setEnabled(!m_project.defectAssets.isEmpty());
+    QAction *chosen = menu.exec(ui->assetListView->viewport()->mapToGlobal(pos));
+    if (chosen == deleteAction) {
+        deleteSelectedAsset();
+    } else if (chosen == clearAction) {
+        clearAssets();
+    }
+}
+
+void MainWindow::showGeneratedContextMenu(const QPoint &pos)
+{
+    if (!ensureProjectLoaded()) {
+        return;
+    }
+    const QModelIndex index = ui->generatedListView->indexAt(pos);
+    if (index.isValid()) {
+        ui->generatedListView->setCurrentIndex(index);
+    }
+    QMenu menu(this);
+    QAction *deleteAction = menu.addAction(QStringLiteral("Delete Selected"));
+    deleteAction->setEnabled(ui->generatedListView->currentIndex().isValid());
+    QAction *clearAction = menu.addAction(QStringLiteral("Clear All"));
+    clearAction->setEnabled(!m_generatedModel.stringList().isEmpty());
+    QAction *chosen = menu.exec(ui->generatedListView->viewport()->mapToGlobal(pos));
+    if (chosen == deleteAction) {
+        deleteSelectedGenerated();
+    } else if (chosen == clearAction) {
+        clearGeneratedImages();
+    }
+}
+
+void MainWindow::deleteSelectedOkImage()
+{
+    const int row = ui->okListView->currentIndex().row();
+    if (row < 0 || row >= m_project.okImages.size()) {
+        showError(QStringLiteral("Select an OK image first."));
+        return;
+    }
+    if (!confirmDelete(QStringLiteral("Delete selected OK image from project?"))) {
+        return;
+    }
+    QString error;
+    if (!removeOkImageAt(row, &error)) {
+        showError(error);
+        return;
+    }
+    if (saveProject()) {
+        refreshProjectViews();
+        appendLog(QStringLiteral("Deleted selected OK image."));
+    }
+}
+
+void MainWindow::clearOkImages()
+{
+    if (m_project.okImages.isEmpty()) {
+        return;
+    }
+    if (!confirmDelete(QStringLiteral("Delete all OK images from this project?"))) {
+        return;
+    }
+    QString error;
+    while (!m_project.okImages.isEmpty()) {
+        if (!removeOkImageAt(m_project.okImages.size() - 1, &error)) {
+            showError(error);
+            return;
+        }
+    }
+    if (saveProject()) {
+        refreshProjectViews();
+        appendLog(QStringLiteral("Deleted all OK images."));
+    }
+}
+
+void MainWindow::deleteSelectedDefectSource()
+{
+    const QString relativePath = currentDefectSourceRelativePath();
+    if (relativePath.isEmpty()) {
+        showError(QStringLiteral("Select a defect source first."));
+        return;
+    }
+    if (!confirmDelete(QStringLiteral("Delete selected defect source and its related assets?"))) {
+        return;
+    }
+    QString error;
+    if (!removeDefectSourceByRelativePath(relativePath, &error)) {
+        showError(error);
+        return;
+    }
+    if (saveProject()) {
+        refreshProjectViews();
+        appendLog(QStringLiteral("Deleted defect source: %1").arg(relativePath));
+    }
+}
+
+void MainWindow::clearDefectSources()
+{
+    const QStringList sources = m_defectModel.stringList();
+    if (sources.isEmpty()) {
+        return;
+    }
+    if (!confirmDelete(QStringLiteral("Delete all defect sources and their related assets?"))) {
+        return;
+    }
+    QString error;
+    for (const QString &relativePath : sources) {
+        if (!removeDefectSourceByRelativePath(relativePath, &error)) {
+            showError(error);
+            return;
+        }
+    }
+    if (saveProject()) {
+        refreshProjectViews();
+        appendLog(QStringLiteral("Deleted all defect sources."));
+    }
+}
+
+void MainWindow::deleteSelectedAsset()
+{
+    const int row = ui->assetListView->currentIndex().row();
+    if (row < 0 || row >= m_project.defectAssets.size()) {
+        showError(QStringLiteral("Select a defect asset first."));
+        return;
+    }
+    if (!confirmDelete(QStringLiteral("Delete selected defect asset?"))) {
+        return;
+    }
+    QString error;
+    if (!removeAssetAt(row, &error)) {
+        showError(error);
+        return;
+    }
+    if (saveProject()) {
+        refreshProjectViews();
+        appendLog(QStringLiteral("Deleted selected defect asset."));
+    }
+}
+
+void MainWindow::clearAssets()
+{
+    if (m_project.defectAssets.isEmpty()) {
+        return;
+    }
+    if (!confirmDelete(QStringLiteral("Delete all defect assets? Defect source images will be kept."))) {
+        return;
+    }
+    QString error;
+    while (!m_project.defectAssets.isEmpty()) {
+        if (!removeAssetAt(m_project.defectAssets.size() - 1, &error)) {
+            showError(error);
+            return;
+        }
+    }
+    if (saveProject()) {
+        refreshProjectViews();
+        appendLog(QStringLiteral("Deleted all defect assets."));
+    }
+}
+
+void MainWindow::deleteSelectedGenerated()
+{
+    const QString imagePath = selectedGeneratedPath();
+    if (imagePath.isEmpty()) {
+        showError(QStringLiteral("Select a generated image first."));
+        return;
+    }
+    if (!confirmDelete(QStringLiteral("Delete selected generated image, mask and metadata?"))) {
+        return;
+    }
+    QString error;
+    if (!removeGeneratedFileSet(imagePath, &error)) {
+        showError(error);
+        return;
+    }
+    refreshGeneratedList();
+    appendLog(QStringLiteral("Deleted selected generated item."));
+}
+
+void MainWindow::clearGeneratedImages()
+{
+    const QStringList images = m_generatedModel.stringList();
+    if (images.isEmpty()) {
+        return;
+    }
+    if (!confirmDelete(QStringLiteral("Delete all generated images, masks and metadata?"))) {
+        return;
+    }
+    QString error;
+    for (const QString &imagePath : images) {
+        if (!removeGeneratedFileSet(imagePath, &error)) {
+            showError(error);
+            return;
+        }
+    }
+    refreshGeneratedList();
+    appendLog(QStringLiteral("Deleted all generated items."));
+}
+
 void MainWindow::setToolView()
 {
     ui->imageView->setToolMode(ImageView::ViewMode);
@@ -598,4 +857,92 @@ void MainWindow::moveReviewedFileSet(const QString &imagePath, const QString &ta
         return;
     }
     appendLog(QStringLiteral("Moved generated item to %1: %2").arg(targetSubDir, base));
+}
+
+bool MainWindow::removeFileIfExists(const QString &path, QString *errorMessage)
+{
+    if (path.isEmpty() || !QFileInfo::exists(path)) {
+        return true;
+    }
+    QFile file(path);
+    if (!file.remove()) {
+        if (errorMessage) {
+            *errorMessage = QStringLiteral("Failed to delete file: %1, %2").arg(path, file.errorString());
+        }
+        return false;
+    }
+    Logger::instance().log(Logger::Info, QStringLiteral("Deleted file: %1").arg(path));
+    return true;
+}
+
+bool MainWindow::removeOkImageAt(int row, QString *errorMessage)
+{
+    if (row < 0 || row >= m_project.okImages.size()) {
+        if (errorMessage) {
+            *errorMessage = QStringLiteral("OK image index is invalid.");
+        }
+        return false;
+    }
+    const OkImageRecord record = m_project.okImages.at(row);
+    if (!removeFileIfExists(m_store.absolutePath(m_projectDir, record.imagePath), errorMessage)) {
+        return false;
+    }
+    if (!record.allowedMaskPath.isEmpty() &&
+        !removeFileIfExists(m_store.absolutePath(m_projectDir, record.allowedMaskPath), errorMessage)) {
+        return false;
+    }
+    m_project.okImages.removeAt(row);
+    return true;
+}
+
+bool MainWindow::removeAssetAt(int row, QString *errorMessage)
+{
+    if (row < 0 || row >= m_project.defectAssets.size()) {
+        if (errorMessage) {
+            *errorMessage = QStringLiteral("Defect asset index is invalid.");
+        }
+        return false;
+    }
+    const DefectAssetRecord asset = m_project.defectAssets.at(row);
+    if (!removeFileIfExists(m_store.absolutePath(m_projectDir, asset.maskPath), errorMessage)) {
+        return false;
+    }
+    m_project.defectAssets.removeAt(row);
+    return true;
+}
+
+bool MainWindow::removeDefectSourceByRelativePath(const QString &relativePath, QString *errorMessage)
+{
+    for (int i = m_project.defectAssets.size() - 1; i >= 0; --i) {
+        if (m_project.defectAssets.at(i).imagePath == relativePath) {
+            if (!removeAssetAt(i, errorMessage)) {
+                return false;
+            }
+        }
+    }
+    return removeFileIfExists(m_store.absolutePath(m_projectDir, relativePath), errorMessage);
+}
+
+bool MainWindow::removeGeneratedFileSet(const QString &imagePath, QString *errorMessage)
+{
+    QFileInfo imageInfo(imagePath);
+    const QString base = imageInfo.completeBaseName();
+    const QString maskPath = imageInfo.absolutePath() + QDir::separator() + base + QStringLiteral("_mask.png");
+    const QString metadataPath = QDir(m_projectDir).filePath(QStringLiteral("metadata/") + base + QStringLiteral(".json"));
+    if (!removeFileIfExists(imagePath, errorMessage)) {
+        return false;
+    }
+    if (!removeFileIfExists(maskPath, errorMessage)) {
+        return false;
+    }
+    return removeFileIfExists(metadataPath, errorMessage);
+}
+
+bool MainWindow::confirmDelete(const QString &message) const
+{
+    return QMessageBox::question(const_cast<MainWindow *>(this),
+                                 QStringLiteral("Confirm delete"),
+                                 message,
+                                 QMessageBox::Yes | QMessageBox::No,
+                                 QMessageBox::No) == QMessageBox::Yes;
 }

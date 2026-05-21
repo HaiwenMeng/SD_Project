@@ -1,0 +1,3 @@
+[submodule "TestSDDemo/third_party/stable-diffusion.cpp"]
+	path = TestSDDemo/third_party/stable-diffusion.cpp
+	url = https://github.com/leejet/stable-diffusion.cpp

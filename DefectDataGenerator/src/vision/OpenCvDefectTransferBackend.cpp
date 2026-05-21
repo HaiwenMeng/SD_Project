@@ -287,7 +287,14 @@ bool OpenCvDefectTransferBackend::placeOneDefect(const AssetMat &asset,
 
     cv::Mat finalImage = rotatedImage(cv::Rect(rotatedBbox.x(), rotatedBbox.y(), rotatedBbox.width(), rotatedBbox.height())).clone();
     cv::Mat finalMask = rotatedMask(cv::Rect(rotatedBbox.x(), rotatedBbox.y(), rotatedBbox.width(), rotatedBbox.height())).clone();
+    cv::threshold(finalMask, finalMask, 0, 255, cv::THRESH_BINARY);
+    cv::Mat grayDefect;
+    cv::cvtColor(finalImage, grayDefect, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(grayDefect, finalImage, cv::COLOR_GRAY2BGR);
     finalImage.convertTo(finalImage, -1, 1.0, brightnessDist(*rng));
+    cv::Mat inverseFinalMask;
+    cv::bitwise_not(finalMask, inverseFinalMask);
+    finalImage.setTo(cv::Scalar(0, 0, 0), inverseFinalMask);
 
     std::uniform_int_distribution<int> xDist(0, canvas->cols - finalImage.cols);
     std::uniform_int_distribution<int> yDist(0, canvas->rows - finalImage.rows);
@@ -315,10 +322,13 @@ bool OpenCvDefectTransferBackend::placeOneDefect(const AssetMat &asset,
         ++feather;
     }
     feather = std::max(1, feather);
+    cv::Mat hardAlpha;
+    finalMask.convertTo(hardAlpha, CV_32FC1, 1.0 / 255.0);
     cv::Mat alpha;
-    finalMask.convertTo(alpha, CV_32FC1, 1.0 / 255.0);
+    hardAlpha.copyTo(alpha);
     if (feather > 1) {
         cv::GaussianBlur(alpha, alpha, cv::Size(feather, feather), 0);
+        alpha = alpha.mul(hardAlpha);
     }
     cv::Mat alpha3;
     cv::cvtColor(alpha, alpha3, cv::COLOR_GRAY2BGR);
@@ -331,7 +341,9 @@ bool OpenCvDefectTransferBackend::placeOneDefect(const AssetMat &asset,
     finalImage.convertTo(defectFloat, CV_32FC3);
     cv::Mat inverseAlpha = cv::Mat::ones(alpha3.size(), alpha3.type()) - alpha3;
     cv::Mat blended = defectFloat.mul(alpha3) + baseFloat.mul(inverseAlpha);
-    blended.convertTo(canvasRoi, CV_8UC3);
+    cv::Mat blended8;
+    blended.convertTo(blended8, CV_8UC3);
+    blended8.copyTo(canvasRoi, finalMask);
 
     cv::Mat maskRoi = (*combinedMask)(roi);
     cv::bitwise_or(maskRoi, finalMask, maskRoi);

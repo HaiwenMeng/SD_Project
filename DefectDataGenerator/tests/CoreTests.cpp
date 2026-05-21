@@ -74,6 +74,28 @@ bool testProjectRoundTrip()
     return true;
 }
 
+bool testMaskedCopyDoesNotWriteOutsideMask()
+{
+    cv::Mat base(32, 32, CV_8UC3, cv::Scalar(128, 128, 128));
+    cv::Mat defect(10, 12, CV_8UC3, cv::Scalar(255, 0, 0));
+    cv::Mat mask(10, 12, CV_8UC1, cv::Scalar(0));
+    cv::line(mask, cv::Point(1, 1), cv::Point(10, 8), cv::Scalar(255), 2);
+
+    cv::Rect roi(8, 9, defect.cols, defect.rows);
+    cv::Mat canvasRoi = base(roi);
+    defect.copyTo(canvasRoi, mask);
+
+    for (int y = 0; y < mask.rows; ++y) {
+        for (int x = 0; x < mask.cols; ++x) {
+            const cv::Vec3b pixel = canvasRoi.at<cv::Vec3b>(y, x);
+            if (mask.at<uchar>(y, x) == 0 && pixel != cv::Vec3b(128, 128, 128)) {
+                return check(false, QStringLiteral("masked copy wrote outside mask"));
+            }
+        }
+    }
+    return true;
+}
+
 } // namespace
 
 int main(int argc, char *argv[])
@@ -86,6 +108,9 @@ int main(int argc, char *argv[])
         return 1;
     }
     if (!testProjectRoundTrip()) {
+        return 1;
+    }
+    if (!testMaskedCopyDoesNotWriteOutsideMask()) {
         return 1;
     }
     return 0;

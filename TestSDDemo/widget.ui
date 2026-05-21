@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Widget</class>
+ <widget class="QWidget" name="Widget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1160</width>
+    <height>760</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>TestSDDemo</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <item>
+    <widget class="QGroupBox" name="modelGroup">
+     <property name="title">
+      <string>Models and Output</string>
+     </property>
+     <layout class="QGridLayout" name="modelLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="textModelLabel">
+        <property name="text">
+         <string>Txt2Img model</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="textModelEdit"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="browseTextModelButton">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="inpaintModelLabel">
+        <property name="text">
+         <string>Inpaint model</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="inpaintModelEdit"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="browseInpaintModelButton">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="outputDirLabel">
+        <property name="text">
+         <string>Output dir</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="outputDirEdit"/>
+      </item>
+      <item row="2" column="2">
+       <widget class="QPushButton" name="browseOutputButton">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="contentLayout">
+     <item>
+      <layout class="QVBoxLayout" name="controlLayout">
+       <item>
+        <widget class="QGroupBox" name="promptGroup">
+         <property name="title">
+          <string>Prompt</string>
+         </property>
+         <layout class="QGridLayout" name="promptLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="promptLabel">
+            <property name="text">
+             <string>Prompt</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QTextEdit" name="promptEdit">
+            <property name="minimumSize">
+             <size>
+              <width>520</width>
+              <height>90</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="negativePromptLabel">
+            <property name="text">
+             <string>Negative</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QTextEdit" name="negativePromptEdit">
+            <property name="minimumSize">
+             <size>
+              <width>520</width>
+              <height>70</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="paramsGroup">
+         <property name="title">
+          <string>Parameters</string>
+         </property>
+         <layout class="QGridLayout" name="paramsLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="widthLabel">
+            <property name="text">
+             <string>Width</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="widthSpin">
+            <property name="minimum">
+             <number>64</number>
+            </property>
+            <property name="maximum">
+             <number>2048</number>
+            </property>
+            <property name="singleStep">
+             <number>64</number>
+            </property>
+            <property name="value">
+             <number>512</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="heightLabel">
+            <property name="text">
+             <string>Height</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QSpinBox" name="heightSpin">
+            <property name="minimum">
+             <number>64</number>
+            </property>
+            <property name="maximum">
+             <number>2048</number>
+            </property>
+            <property name="singleStep">
+             <number>64</number>
+            </property>
+            <property name="value">
+             <number>512</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="stepsLabel">
+            <property name="text">
+             <string>Steps</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="stepsSpin">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>150</number>
+            </property>
+            <property name="value">
+             <number>20</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="seedLabel">
+            <property name="text">
+             <string>Seed</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QSpinBox" name="seedSpin">
+            <property name="minimum">
+             <number>-1</number>
+            </property>
+            <property name="maximum">
+             <number>2147483647</number>
+            </property>
+            <property name="value">
+             <number>42</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="cfgLabel">
+            <property name="text">
+             <string>CFG</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="cfgSpin">
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>30.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.500000000000000</double>
+            </property>
+            <property name="value">
+             <double>7.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="strengthLabel">
+            <property name="text">
+             <string>Strength</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QDoubleSpinBox" name="strengthSpin">
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>0.050000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.050000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.750000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="inpaintInputGroup">
+         <property name="title">
+          <string>Inpaint Input</string>
+         </property>
+         <layout class="QGridLayout" name="inpaintInputLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="initImageLabel">
+            <property name="text">
+             <string>Init image</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="initImageEdit"/>
+          </item>
+          <item row="0" column="2">
+           <widget class="QPushButton" name="browseInitButton">
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="maskImageLabel">
+            <property name="text">
+             <string>Mask image</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="maskImageEdit"/>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="browseMaskButton">
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="buttonLayout">
+         <item>
+          <widget class="QPushButton" name="generateTextButton">
+           <property name="minimumSize">
+            <size>
+             <width>180</width>
+             <height>38</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Generate Txt2Img</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="generateInpaintButton">
+           <property name="minimumSize">
+            <size>
+             <width>180</width>
+             <height>38</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Generate Inpaint</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="progressLabel">
+           <property name="text">
+            <string>Idle</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="logEdit">
+         <property name="minimumSize">
+          <size>
+           <width>620</width>
+           <height>150</height>
+          </size>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="previewLabel">
+       <property name="minimumSize">
+        <size>
+         <width>480</width>
+         <height>560</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="text">
+        <string>No output</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

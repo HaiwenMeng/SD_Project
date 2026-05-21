@@ -30,6 +30,18 @@ private slots:
     void onOkImageSelected();
     void onDefectSourceSelected();
     void onGeneratedSelected();
+    void showOkContextMenu(const QPoint &pos);
+    void showDefectSourceContextMenu(const QPoint &pos);
+    void showAssetContextMenu(const QPoint &pos);
+    void showGeneratedContextMenu(const QPoint &pos);
+    void deleteSelectedOkImage();
+    void clearOkImages();
+    void deleteSelectedDefectSource();
+    void clearDefectSources();
+    void deleteSelectedAsset();
+    void clearAssets();
+    void deleteSelectedGenerated();
+    void clearGeneratedImages();
     void setToolView();
     void setToolRect();
     void setToolPolygon();
@@ -51,6 +63,12 @@ private:
     void setProjectDir(const QString &dir);
     void showError(const QString &message);
     void moveReviewedFileSet(const QString &imagePath, const QString &targetSubDir);
+    bool removeFileIfExists(const QString &path, QString *errorMessage);
+    bool removeOkImageAt(int row, QString *errorMessage);
+    bool removeAssetAt(int row, QString *errorMessage);
+    bool removeDefectSourceByRelativePath(const QString &relativePath, QString *errorMessage);
+    bool removeGeneratedFileSet(const QString &imagePath, QString *errorMessage);
+    bool confirmDelete(const QString &message) const;
 
     Ui::MainWindow *ui = nullptr;
     ProjectStore m_store;

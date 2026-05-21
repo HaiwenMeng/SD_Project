@@ -3,6 +3,12 @@ CONFIG += c++17
 TEMPLATE = app
 TARGET = DefectDataGenerator
 
+DESTDIR = $$PWD/../BIN
+OBJECTS_DIR = $$PWD/build/qmake/obj
+MOC_DIR = $$PWD/build/qmake/moc
+RCC_DIR = $$PWD/build/qmake/rcc
+UI_DIR = $$PWD/build/qmake/ui
+
 SOURCES += \
     src/app/main.cpp \
     src/app/MainWindow.cpp \
@@ -37,11 +43,14 @@ exists($$OPENCV_ROOT/include/opencv2/opencv.hpp) {
         exists($$OPENCV_ROOT/lib/opencv_world460d.lib) {
             LIBS += -lopencv_world460d
         } else {
+            DEFINES += CV_IGNORE_DEBUG_BUILD_GUARD
             LIBS += -lopencv_world460
+            warning("opencv_world460d.lib not found. Debug build links release OpenCV with CV_IGNORE_DEBUG_BUILD_GUARD.")
         }
     } else {
         LIBS += -lopencv_world460
     }
 }
 
-DESTDIR = ./BIN
+# Runtime dependency: copy $$OPENCV_ROOT/bin/opencv_world460.dll to $$DESTDIR,
+# or add that bin directory to PATH before launching the application.
