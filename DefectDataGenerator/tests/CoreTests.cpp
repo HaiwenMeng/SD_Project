@@ -96,6 +96,17 @@ bool testMaskedCopyDoesNotWriteOutsideMask()
     return true;
 }
 
+bool testInverseAlphaKeepsAllChannels()
+{
+    cv::Mat alpha3(1, 1, CV_32FC3, cv::Scalar(0.25, 0.25, 0.25));
+    cv::Mat inverseAlpha(alpha3.size(), alpha3.type(), cv::Scalar::all(1.0));
+    inverseAlpha -= alpha3;
+    const cv::Vec3f pixel = inverseAlpha.at<cv::Vec3f>(0, 0);
+    return check(std::abs(pixel[0] - 0.75f) < 0.0001f, QStringLiteral("inverse alpha B mismatch")) &&
+           check(std::abs(pixel[1] - 0.75f) < 0.0001f, QStringLiteral("inverse alpha G mismatch")) &&
+           check(std::abs(pixel[2] - 0.75f) < 0.0001f, QStringLiteral("inverse alpha R mismatch"));
+}
+
 } // namespace
 
 int main(int argc, char *argv[])
@@ -111,6 +122,9 @@ int main(int argc, char *argv[])
         return 1;
     }
     if (!testMaskedCopyDoesNotWriteOutsideMask()) {
+        return 1;
+    }
+    if (!testInverseAlphaKeepsAllChannels()) {
         return 1;
     }
     return 0;

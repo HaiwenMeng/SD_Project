@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->generatedListView->setContextMenuPolicy(Qt::CustomContextMenu);
     setupConnections();
     connect(&Logger::instance(), &Logger::messageLogged, this, &MainWindow::appendLog);
-    appendLog(QString::fromUtf8(u8"\xE5\x87\x86\xE5\xA4\x87\xE5\xB0\xB1\xE7\xBB\xAA"));
+    appendLog(QString(u8"准备就绪"));
 }
 
 MainWindow::~MainWindow()
@@ -78,12 +78,12 @@ void MainWindow::setupConnections()
 
 void MainWindow::newProject()
 {
-    const QString dir = QFileDialog::getExistingDirectory(this, QString::fromUtf8(u8"\xE9\x80\x89\xE6\x8B\xA9\xE9\xA1\xB9\xE7\x9B\xAE\xE7\x9B\xAE\xE5\xBD\x95"));
+    const QString dir = QFileDialog::getExistingDirectory(this, QString(u8"选择项目目录"));
     if (dir.isEmpty()) {
         return;
     }
     bool ok = false;
-    const QString productName = QInputDialog::getText(this, QString::fromUtf8(u8"\xE4\xBA\xA7\xE5\x93\x81"), QString::fromUtf8(u8"\xE4\xBA\xA7\xE5\x93\x81\xE5\x90\x8D\xE7\xA7\xB0"), QLineEdit::Normal, QString::fromUtf8(u8"\xE9\xBB\x98\xE8\xAE\xA4\xE4\xBA\xA7\xE5\x93\x81"), &ok);
+    const QString productName = QInputDialog::getText(this, QString(u8"产品"), QString(u8"产品名称"), QLineEdit::Normal, QString(u8"默认产品"), &ok);
     if (!ok) {
         return;
     }
@@ -101,12 +101,12 @@ void MainWindow::newProject()
     m_project = data;
     setProjectDir(dir);
     refreshProjectViews();
-    appendLog(QString::fromUtf8(u8"\xE9\xA1\xB9\xE7\x9B\xAE\xE5\xB7\xB2\xE5\x88\x9B\xE5\xBB\xBA\x3A\x20%1").arg(dir));
+    appendLog(QString(u8"项目已创建: %1").arg(dir));
 }
 
 void MainWindow::openProject()
 {
-    const QString dir = QFileDialog::getExistingDirectory(this, QString::fromUtf8(u8"\xE6\x89\x93\xE5\xBC\x80\xE9\xA1\xB9\xE7\x9B\xAE\xE7\x9B\xAE\xE5\xBD\x95"));
+    const QString dir = QFileDialog::getExistingDirectory(this, QString(u8"打开项目目录"));
     if (dir.isEmpty()) {
         return;
     }
@@ -123,7 +123,7 @@ void MainWindow::openProject()
     for (const QString &line : validation) {
         Logger::instance().log(Logger::Warning, line);
     }
-    appendLog(QString::fromUtf8(u8"\xE9\xA1\xB9\xE7\x9B\xAE\xE5\xB7\xB2\xE6\x89\x93\xE5\xBC\x80\x3A\x20%1").arg(dir));
+    appendLog(QString(u8"项目已打开: %1").arg(dir));
 }
 
 void MainWindow::importOkImages()
@@ -131,7 +131,7 @@ void MainWindow::importOkImages()
     if (!ensureProjectLoaded()) {
         return;
     }
-    const QStringList files = QFileDialog::getOpenFileNames(this, QString::fromUtf8(u8"\xE5\xAF\xBC\xE5\x85\xA5\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F"), QString(), QString::fromUtf8(u8"\xE5\x9B\xBE\xE5\x83\x8F\x20(*.png *.jpg *.jpeg *.bmp)"));
+    const QStringList files = QFileDialog::getOpenFileNames(this, QString(u8"导入 OK 图像"), QString(), QString(u8"图像 (*.png *.jpg *.jpeg *.bmp)"));
     if (files.isEmpty()) {
         return;
     }
@@ -152,7 +152,7 @@ void MainWindow::importDefectImages()
     if (!ensureProjectLoaded()) {
         return;
     }
-    const QStringList files = QFileDialog::getOpenFileNames(this, QString::fromUtf8(u8"\xE5\xAF\xBC\xE5\x85\xA5\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE"), QString(), QString::fromUtf8(u8"\xE5\x9B\xBE\xE5\x83\x8F\x20(*.png *.jpg *.jpeg *.bmp)"));
+    const QStringList files = QFileDialog::getOpenFileNames(this, QString(u8"导入缺陷源图"), QString(), QString(u8"图像 (*.png *.jpg *.jpeg *.bmp)"));
     if (files.isEmpty()) {
         return;
     }
@@ -167,7 +167,7 @@ void MainWindow::importDefectImages()
         current.append(relativePath);
     }
     m_defectModel.setStringList(current);
-    appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\xAF\xBC\xE5\x85\xA5\x20%1\x20\xE5\xBC\xA0\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE").arg(files.size()));
+    appendLog(QString(u8"已导入 %1 张缺陷源图").arg(files.size()));
 }
 
 void MainWindow::saveCurrentMaskAsAsset()
@@ -177,12 +177,12 @@ void MainWindow::saveCurrentMaskAsAsset()
     }
     const QString sourceRelative = currentDefectSourceRelativePath();
     if (sourceRelative.isEmpty()) {
-        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE"));
+        showError(QString(u8"请先选择一张缺陷源图"));
         return;
     }
     const QString defectType = ui->defectTypeEdit->text().trimmed();
     if (defectType.isEmpty()) {
-        showError(QString::fromUtf8(u8"\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB1\xBB\xE5\x9E\x8B\xE4\xB8\xBA\xE7\xA9\xBA"));
+        showError(QString(u8"缺陷类型为空"));
         return;
     }
 
@@ -210,7 +210,7 @@ void MainWindow::saveCurrentMaskAsAsset()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QString::fromUtf8(u8"\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90\xE5\xB7\xB2\xE4\xBF\x9D\xE5\xAD\x98\x2E\x20\xE7\xB1\xBB\xE5\x9E\x8B=%1\x20\xE9\x9D\xA2\xE7\xA7\xAF=%2").arg(defectType).arg(area));
+        appendLog(QString(u8"缺陷素材已保存. 类型=%1 面积=%2").arg(defectType).arg(area));
     }
 }
 
@@ -221,11 +221,11 @@ void MainWindow::generateImages()
     }
     const QString okPath = selectedOkImagePath();
     if (okPath.isEmpty()) {
-        showError(QString::fromUtf8(u8"\xE7\x94\x9F\xE6\x88\x90\xE5\x89\x8D\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F"));
+        showError(QString(u8"生成前请先选择一张 OK 图像"));
         return;
     }
     if (m_project.defectAssets.isEmpty()) {
-        showError(QString::fromUtf8(u8"\xE6\xB2\xA1\xE6\x9C\x89\xE5\x8F\xAF\xE7\x94\xA8\xE7\x9A\x84\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90"));
+        showError(QString(u8"没有可用的缺陷素材"));
         return;
     }
 
@@ -237,23 +237,23 @@ void MainWindow::generateImages()
     request.defectsPerImageMax = ui->defectMaxSpin->value();
     request.seed = ui->seedSpin->value();
     if (request.defectsPerImageMax < request.defectsPerImageMin) {
-        showError(QString::fromUtf8(u8"\xE5\x8D\x95\xE5\x9B\xBE\xE7\xBC\xBA\xE9\x99\xB7\xE6\x95\xB0\xE6\x9C\x80\xE5\xA4\xA7\xE5\x80\xBC\xE5\xBF\x85\xE9\xA1\xBB\xE5\xA4\xA7\xE4\xBA\x8E\xE7\xAD\x89\xE4\xBA\x8E\xE6\x9C\x80\xE5\xB0\x8F\xE5\x80\xBC"));
+        showError(QString(u8"单图缺陷数最大值必须大于等于最小值"));
         return;
     }
     if (ui->scaleMaxSpin->value() < ui->scaleMinSpin->value()) {
-        showError(QString::fromUtf8(u8"\xE7\xBC\xA9\xE6\x94\xBE\xE6\x9C\x80\xE5\xA4\xA7\xE5\x80\xBC\xE5\xBF\x85\xE9\xA1\xBB\xE5\xA4\xA7\xE4\xBA\x8E\xE7\xAD\x89\xE4\xBA\x8E\xE6\x9C\x80\xE5\xB0\x8F\xE5\x80\xBC"));
+        showError(QString(u8"缩放最大值必须大于等于最小值"));
         return;
     }
     if (ui->rotationMaxSpin->value() < ui->rotationMinSpin->value()) {
-        showError(QString::fromUtf8(u8"\xE6\x97\x8B\xE8\xBD\xAC\xE6\x9C\x80\xE5\xA4\xA7\xE5\x80\xBC\xE5\xBF\x85\xE9\xA1\xBB\xE5\xA4\xA7\xE4\xBA\x8E\xE7\xAD\x89\xE4\xBA\x8E\xE6\x9C\x80\xE5\xB0\x8F\xE5\x80\xBC"));
+        showError(QString(u8"旋转最大值必须大于等于最小值"));
         return;
     }
     if (ui->brightnessMaxSpin->value() < ui->brightnessMinSpin->value()) {
-        showError(QString::fromUtf8(u8"\xE4\xBA\xAE\xE5\xBA\xA6\xE6\x9C\x80\xE5\xA4\xA7\xE5\x80\xBC\xE5\xBF\x85\xE9\xA1\xBB\xE5\xA4\xA7\xE4\xBA\x8E\xE7\xAD\x89\xE4\xBA\x8E\xE6\x9C\x80\xE5\xB0\x8F\xE5\x80\xBC"));
+        showError(QString(u8"亮度最大值必须大于等于最小值"));
         return;
     }
     if (ui->featherMaxSpin->value() < ui->featherMinSpin->value()) {
-        showError(QString::fromUtf8(u8"\xE7\xBE\xBD\xE5\x8C\x96\xE6\x9C\x80\xE5\xA4\xA7\xE5\x80\xBC\xE5\xBF\x85\xE9\xA1\xBB\xE5\xA4\xA7\xE4\xBA\x8E\xE7\xAD\x89\xE4\xBA\x8E\xE6\x9C\x80\xE5\xB0\x8F\xE5\x80\xBC"));
+        showError(QString(u8"羽化最大值必须大于等于最小值"));
         return;
     }
     request.params.insert(QStringLiteral("scaleMin"), ui->scaleMinSpin->value());
@@ -266,18 +266,18 @@ void MainWindow::generateImages()
     request.params.insert(QStringLiteral("featherMax"), ui->featherMaxSpin->value());
     const QString selectedType = ui->generateTypeCombo->currentText();
     for (const DefectAssetRecord &asset : m_project.defectAssets) {
-        if (selectedType == QString::fromUtf8(u8"\xE5\x85\xA8\xE9\x83\xA8") || asset.defectType == selectedType) {
+        if (selectedType == QString(u8"全部") || asset.defectType == selectedType) {
             request.defectAssetIds.append(asset.id);
         }
     }
     if (request.defectAssetIds.isEmpty()) {
-        showError(QString::fromUtf8(u8"\xE6\xB2\xA1\xE6\x9C\x89\xE5\x8C\xB9\xE9\x85\x8D\xE5\xBD\x93\xE5\x89\x8D\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB1\xBB\xE5\x9E\x8B\xE7\x9A\x84\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90"));
+        showError(QString(u8"没有匹配当前缺陷类型的缺陷素材"));
         return;
     }
 
     std::unique_ptr<IGenerationBackend> backend = BackendFactory::createBackend(QStringLiteral("OpenCV"));
     if (!backend) {
-        showError(QString::fromUtf8(u8"OpenCV \xE7\x94\x9F\xE6\x88\x90\xE5\x90\x8E\xE7\xAB\xAF\xE4\xB8\x8D\xE5\x8F\xAF\xE7\x94\xA8"));
+        showError(QString(u8"OpenCV 生成后端不可用"));
         return;
     }
     setEnabled(false);
@@ -288,14 +288,14 @@ void MainWindow::generateImages()
         return;
     }
     refreshGeneratedList();
-    appendLog(QString::fromUtf8(u8"\xE7\x94\x9F\xE6\x88\x90\xE5\xAE\x8C\xE6\x88\x90\x3A\x20%1\x20\xE5\xBC\xA0").arg(result.items.size()));
+    appendLog(QString(u8"生成完成: %1 张").arg(result.items.size()));
 }
 
 void MainWindow::approveSelectedGenerated()
 {
     const QString path = selectedGeneratedPath();
     if (path.isEmpty()) {
-        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\xE7\x94\x9F\xE6\x88\x90\xE5\x9B\xBE"));
+        showError(QString(u8"请先选择一张生成图"));
         return;
     }
     moveReviewedFileSet(path, QStringLiteral("approved"));
@@ -306,7 +306,7 @@ void MainWindow::rejectSelectedGenerated()
 {
     const QString path = selectedGeneratedPath();
     if (path.isEmpty()) {
-        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\xE7\x94\x9F\xE6\x88\x90\xE5\x9B\xBE"));
+        showError(QString(u8"请先选择一张生成图"));
         return;
     }
     moveReviewedFileSet(path, QStringLiteral("rejected"));
@@ -318,7 +318,7 @@ void MainWindow::exportApprovedDataset()
     if (!ensureProjectLoaded()) {
         return;
     }
-    const QString outDir = QFileDialog::getExistingDirectory(this, QString::fromUtf8(u8"\xE9\x80\x89\xE6\x8B\xA9\xE5\xAF\xBC\xE5\x87\xBA\xE7\x9B\xAE\xE5\xBD\x95"));
+    const QString outDir = QFileDialog::getExistingDirectory(this, QString(u8"选择导出目录"));
     if (outDir.isEmpty()) {
         return;
     }
@@ -340,17 +340,17 @@ void MainWindow::exportApprovedDataset()
         const QString dstMask = dir.filePath(QStringLiteral("masks/") + maskName);
         const QString dstMeta = dir.filePath(QStringLiteral("metadata/") + metaName);
         if (!QFile::copy(imageInfo.absoluteFilePath(), dstImage)) {
-            showError(QString::fromUtf8(u8"\xE5\xAF\xBC\xE5\x87\xBA\xE5\x9B\xBE\xE5\x83\x8F\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(imageInfo.fileName()));
+            showError(QString(u8"导出图像失败: %1").arg(imageInfo.fileName()));
             return;
         }
         const QString srcMask = approvedDir.filePath(maskName);
         if (!QFile::copy(srcMask, dstMask)) {
-            showError(QString::fromUtf8(u8"\xE5\xAF\xBC\xE5\x87\xBA\x20mask\x20\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(maskName));
+            showError(QString(u8"导出 mask 失败: %1").arg(maskName));
             return;
         }
         const QString srcMeta = approvedDir.filePath(metaName);
         if (QFileInfo::exists(srcMeta) && !QFile::copy(srcMeta, dstMeta)) {
-            showError(QString::fromUtf8(u8"\xE5\xAF\xBC\xE5\x87\xBA\x20metadata\x20\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(metaName));
+            showError(QString(u8"导出 metadata 失败: %1").arg(metaName));
             return;
         }
         QJsonObject item;
@@ -365,11 +365,11 @@ void MainWindow::exportApprovedDataset()
     dataset.insert(QStringLiteral("items"), items);
     QFile datasetFile(dir.filePath(QStringLiteral("dataset.json")));
     if (!datasetFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        showError(QString::fromUtf8(u8"\xE5\x86\x99\xE5\x85\xA5\x20dataset.json\x20\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(datasetFile.errorString()));
+        showError(QString(u8"写入 dataset.json 失败: %1").arg(datasetFile.errorString()));
         return;
     }
     datasetFile.write(QJsonDocument(dataset).toJson(QJsonDocument::Indented));
-    appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\xAF\xBC\xE5\x87\xBA\xE9\x80\x9A\xE8\xBF\x87\xE6\x95\xB0\xE6\x8D\xAE\xE9\x9B\x86\x3A\x20%1\x20\xE6\x9D\xA1").arg(items.size()));
+    appendLog(QString(u8"已导出通过数据集: %1 条").arg(items.size()));
 }
 
 void MainWindow::onOkImageSelected()
@@ -423,9 +423,9 @@ void MainWindow::showOkContextMenu(const QPoint &pos)
         ui->okListView->setCurrentIndex(index);
     }
     QMenu menu(this);
-    QAction *deleteAction = menu.addAction(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE9\xA1\xB9"));
+    QAction *deleteAction = menu.addAction(QString(u8"删除选中项"));
     deleteAction->setEnabled(ui->okListView->currentIndex().isValid());
-    QAction *clearAction = menu.addAction(QString::fromUtf8(u8"\xE6\xB8\x85\xE7\xA9\xBA\xE5\x85\xA8\xE9\x83\xA8"));
+    QAction *clearAction = menu.addAction(QString(u8"清空全部"));
     clearAction->setEnabled(!m_project.okImages.isEmpty());
     QAction *chosen = menu.exec(ui->okListView->viewport()->mapToGlobal(pos));
     if (chosen == deleteAction) {
@@ -445,9 +445,9 @@ void MainWindow::showDefectSourceContextMenu(const QPoint &pos)
         ui->defectListView->setCurrentIndex(index);
     }
     QMenu menu(this);
-    QAction *deleteAction = menu.addAction(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE9\xA1\xB9"));
+    QAction *deleteAction = menu.addAction(QString(u8"删除选中项"));
     deleteAction->setEnabled(ui->defectListView->currentIndex().isValid());
-    QAction *clearAction = menu.addAction(QString::fromUtf8(u8"\xE6\xB8\x85\xE7\xA9\xBA\xE5\x85\xA8\xE9\x83\xA8"));
+    QAction *clearAction = menu.addAction(QString(u8"清空全部"));
     clearAction->setEnabled(!m_defectModel.stringList().isEmpty());
     QAction *chosen = menu.exec(ui->defectListView->viewport()->mapToGlobal(pos));
     if (chosen == deleteAction) {
@@ -467,9 +467,9 @@ void MainWindow::showAssetContextMenu(const QPoint &pos)
         ui->assetListView->setCurrentIndex(index);
     }
     QMenu menu(this);
-    QAction *deleteAction = menu.addAction(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE9\xA1\xB9"));
+    QAction *deleteAction = menu.addAction(QString(u8"删除选中项"));
     deleteAction->setEnabled(ui->assetListView->currentIndex().isValid());
-    QAction *clearAction = menu.addAction(QString::fromUtf8(u8"\xE6\xB8\x85\xE7\xA9\xBA\xE5\x85\xA8\xE9\x83\xA8"));
+    QAction *clearAction = menu.addAction(QString(u8"清空全部"));
     clearAction->setEnabled(!m_project.defectAssets.isEmpty());
     QAction *chosen = menu.exec(ui->assetListView->viewport()->mapToGlobal(pos));
     if (chosen == deleteAction) {
@@ -489,9 +489,9 @@ void MainWindow::showGeneratedContextMenu(const QPoint &pos)
         ui->generatedListView->setCurrentIndex(index);
     }
     QMenu menu(this);
-    QAction *deleteAction = menu.addAction(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE9\xA1\xB9"));
+    QAction *deleteAction = menu.addAction(QString(u8"删除选中项"));
     deleteAction->setEnabled(ui->generatedListView->currentIndex().isValid());
-    QAction *clearAction = menu.addAction(QString::fromUtf8(u8"\xE6\xB8\x85\xE7\xA9\xBA\xE5\x85\xA8\xE9\x83\xA8"));
+    QAction *clearAction = menu.addAction(QString(u8"清空全部"));
     clearAction->setEnabled(!m_generatedModel.stringList().isEmpty());
     QAction *chosen = menu.exec(ui->generatedListView->viewport()->mapToGlobal(pos));
     if (chosen == deleteAction) {
@@ -505,10 +505,10 @@ void MainWindow::deleteSelectedOkImage()
 {
     const int row = ui->okListView->currentIndex().row();
     if (row < 0 || row >= m_project.okImages.size()) {
-        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F"));
+        showError(QString(u8"请先选择一张 OK 图像"));
         return;
     }
-    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F\xE5\x90\x97"))) {
+    if (!confirmDelete(QString(u8"删除选中的 OK 图像吗"))) {
         return;
     }
     QString error;
@@ -518,7 +518,7 @@ void MainWindow::deleteSelectedOkImage()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F"));
+        appendLog(QString(u8"已删除选中的 OK 图像"));
     }
 }
 
@@ -527,7 +527,7 @@ void MainWindow::clearOkImages()
     if (m_project.okImages.isEmpty()) {
         return;
     }
-    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F\xE5\x90\x97"))) {
+    if (!confirmDelete(QString(u8"删除全部 OK 图像吗"))) {
         return;
     }
     QString error;
@@ -539,7 +539,7 @@ void MainWindow::clearOkImages()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F"));
+        appendLog(QString(u8"已删除全部 OK 图像"));
     }
 }
 
@@ -547,10 +547,10 @@ void MainWindow::deleteSelectedDefectSource()
 {
     const QString relativePath = currentDefectSourceRelativePath();
     if (relativePath.isEmpty()) {
-        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE"));
+        showError(QString(u8"请先选择一张缺陷源图"));
         return;
     }
-    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE\xE5\x8F\x8A\xE5\x85\xB3\xE8\x81\x94\xE7\xB4\xA0\xE6\x9D\x90\xE5\x90\x97"))) {
+    if (!confirmDelete(QString(u8"删除选中的缺陷源图及关联素材吗"))) {
         return;
     }
     QString error;
@@ -560,7 +560,7 @@ void MainWindow::deleteSelectedDefectSource()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE\x3A\x20%1").arg(relativePath));
+        appendLog(QString(u8"已删除缺陷源图: %1").arg(relativePath));
     }
 }
 
@@ -570,7 +570,7 @@ void MainWindow::clearDefectSources()
     if (sources.isEmpty()) {
         return;
     }
-    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE\xE5\x8F\x8A\xE5\x85\xB3\xE8\x81\x94\xE7\xB4\xA0\xE6\x9D\x90\xE5\x90\x97"))) {
+    if (!confirmDelete(QString(u8"删除全部缺陷源图及关联素材吗"))) {
         return;
     }
     QString error;
@@ -582,7 +582,7 @@ void MainWindow::clearDefectSources()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE"));
+        appendLog(QString(u8"已删除全部缺陷源图"));
     }
 }
 
@@ -590,10 +590,10 @@ void MainWindow::deleteSelectedAsset()
 {
     const int row = ui->assetListView->currentIndex().row();
     if (row < 0 || row >= m_project.defectAssets.size()) {
-        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE4\xB8\xAA\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90"));
+        showError(QString(u8"请先选择一个缺陷素材"));
         return;
     }
-    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90\xE5\x90\x97"))) {
+    if (!confirmDelete(QString(u8"删除选中的缺陷素材吗"))) {
         return;
     }
     QString error;
@@ -603,7 +603,7 @@ void MainWindow::deleteSelectedAsset()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90"));
+        appendLog(QString(u8"已删除选中的缺陷素材"));
     }
 }
 
@@ -612,7 +612,7 @@ void MainWindow::clearAssets()
     if (m_project.defectAssets.isEmpty()) {
         return;
     }
-    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90\xE5\x90\x97\x2E\x20\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE\xE4\xBC\x9A\xE4\xBF\x9D\xE7\x95\x99"))) {
+    if (!confirmDelete(QString(u8"删除全部缺陷素材吗. 缺陷源图会保留"))) {
         return;
     }
     QString error;
@@ -624,7 +624,7 @@ void MainWindow::clearAssets()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90"));
+        appendLog(QString(u8"已删除全部缺陷素材"));
     }
 }
 
@@ -632,10 +632,10 @@ void MainWindow::deleteSelectedGenerated()
 {
     const QString imagePath = selectedGeneratedPath();
     if (imagePath.isEmpty()) {
-        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\xE7\x94\x9F\xE6\x88\x90\xE5\x9B\xBE"));
+        showError(QString(u8"请先选择一张生成图"));
         return;
     }
-    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\xE7\x94\x9F\xE6\x88\x90\xE5\x9B\xBE\x20mask\x20\xE5\x92\x8C\x20metadata\x20\xE5\x90\x97"))) {
+    if (!confirmDelete(QString(u8"删除选中的生成图 mask 和 metadata 吗"))) {
         return;
     }
     QString error;
@@ -644,7 +644,7 @@ void MainWindow::deleteSelectedGenerated()
         return;
     }
     refreshGeneratedList();
-    appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\xE7\x94\x9F\xE6\x88\x90\xE9\xA1\xB9"));
+    appendLog(QString(u8"已删除选中的生成项"));
 }
 
 void MainWindow::clearGeneratedImages()
@@ -653,7 +653,7 @@ void MainWindow::clearGeneratedImages()
     if (images.isEmpty()) {
         return;
     }
-    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\x94\x9F\xE6\x88\x90\xE5\x9B\xBE\x20mask\x20\xE5\x92\x8C\x20metadata\x20\xE5\x90\x97"))) {
+    if (!confirmDelete(QString(u8"删除全部生成图 mask 和 metadata 吗"))) {
         return;
     }
     QString error;
@@ -664,7 +664,7 @@ void MainWindow::clearGeneratedImages()
         }
     }
     refreshGeneratedList();
-    appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\x94\x9F\xE6\x88\x90\xE9\xA1\xB9"));
+    appendLog(QString(u8"已删除全部生成项"));
 }
 
 void MainWindow::setToolView()
@@ -733,7 +733,7 @@ void MainWindow::refreshProjectViews()
 
     QStringList assetItems;
     QStringList generateTypes;
-    generateTypes.append(QString::fromUtf8(u8"\xE5\x85\xA8\xE9\x83\xA8"));
+    generateTypes.append(QString(u8"全部"));
     for (const DefectAssetRecord &asset : m_project.defectAssets) {
         assetItems.append(QStringLiteral("%1 | %2 | area=%3").arg(asset.id, asset.defectType).arg(asset.area));
         if (!generateTypes.contains(asset.defectType)) {
@@ -780,7 +780,7 @@ void MainWindow::refreshGeneratedList()
 bool MainWindow::ensureProjectLoaded() const
 {
     if (m_projectDir.isEmpty()) {
-        QMessageBox::warning(const_cast<MainWindow *>(this), QString::fromUtf8(u8"\xE9\xA1\xB9\xE7\x9B\xAE"), QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE5\x88\x9B\xE5\xBB\xBA\xE6\x88\x96\xE6\x89\x93\xE5\xBC\x80\xE9\xA1\xB9\xE7\x9B\xAE"));
+        QMessageBox::warning(const_cast<MainWindow *>(this), QString(u8"项目"), QString(u8"请先创建或打开项目"));
         return false;
     }
     return true;
@@ -840,7 +840,7 @@ void MainWindow::setProjectDir(const QString &dir)
 void MainWindow::showError(const QString &message)
 {
     Logger::instance().log(Logger::Error, message);
-    QMessageBox::critical(this, QString::fromUtf8(u8"\xE9\x94\x99\xE8\xAF\xAF"), message);
+    QMessageBox::critical(this, QString(u8"错误"), message);
 }
 
 void MainWindow::moveReviewedFileSet(const QString &imagePath, const QString &targetSubDir)
@@ -848,7 +848,7 @@ void MainWindow::moveReviewedFileSet(const QString &imagePath, const QString &ta
     QDir projectDir(m_projectDir);
     QDir targetDir(projectDir.filePath(targetSubDir));
     if (!targetDir.exists() && !projectDir.mkpath(targetSubDir)) {
-        showError(QString::fromUtf8(u8"\xE5\x88\x9B\xE5\xBB\xBA\xE5\xAE\xA1\xE6\xA0\xB8\xE7\x9B\xAE\xE5\xBD\x95\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(targetSubDir));
+        showError(QString(u8"创建审核目录失败: %1").arg(targetSubDir));
         return;
     }
     QFileInfo imageInfo(imagePath);
@@ -860,27 +860,27 @@ void MainWindow::moveReviewedFileSet(const QString &imagePath, const QString &ta
     const QString targetMeta = targetDir.filePath(base + QStringLiteral(".json"));
 
     if (!QFileInfo::exists(maskPath)) {
-        showError(QString::fromUtf8(u8"\xE7\x94\x9F\xE6\x88\x90\x20mask\x20\xE7\xBC\xBA\xE5\xA4\xB1\x3A\x20%1").arg(maskPath));
+        showError(QString(u8"生成 mask 缺失: %1").arg(maskPath));
         return;
     }
     if (!QFileInfo::exists(metaPath)) {
-        showError(QString::fromUtf8(u8"\xE7\x94\x9F\xE6\x88\x90\x20metadata\x20\xE7\xBC\xBA\xE5\xA4\xB1\x3A\x20%1").arg(metaPath));
+        showError(QString(u8"生成 metadata 缺失: %1").arg(metaPath));
         return;
     }
 
     if (!QFile::rename(imagePath, targetImage)) {
-        showError(QString::fromUtf8(u8"\xE7\xA7\xBB\xE5\x8A\xA8\xE5\x9B\xBE\xE5\x83\x8F\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(targetSubDir));
+        showError(QString(u8"移动图像失败: %1").arg(targetSubDir));
         return;
     }
     if (!QFile::rename(maskPath, targetMask)) {
-        showError(QString::fromUtf8(u8"\xE7\xA7\xBB\xE5\x8A\xA8\x20mask\x20\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(targetSubDir));
+        showError(QString(u8"移动 mask 失败: %1").arg(targetSubDir));
         return;
     }
     if (!QFile::rename(metaPath, targetMeta)) {
-        showError(QString::fromUtf8(u8"\xE7\xA7\xBB\xE5\x8A\xA8\x20metadata\x20\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(targetSubDir));
+        showError(QString(u8"移动 metadata 失败: %1").arg(targetSubDir));
         return;
     }
-    appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE7\xA7\xBB\xE5\x8A\xA8\xE7\x94\x9F\xE6\x88\x90\xE9\xA1\xB9\xE5\x88\xB0\x20%1\x3A\x20%2").arg(targetSubDir, base));
+    appendLog(QString(u8"已移动生成项到 %1: %2").arg(targetSubDir, base));
 }
 
 bool MainWindow::removeFileIfExists(const QString &path, QString *errorMessage)
@@ -891,11 +891,11 @@ bool MainWindow::removeFileIfExists(const QString &path, QString *errorMessage)
     QFile file(path);
     if (!file.remove()) {
         if (errorMessage) {
-            *errorMessage = QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE6\x96\x87\xE4\xBB\xB6\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1\x2C\x20%2").arg(path, file.errorString());
+            *errorMessage = QString(u8"删除文件失败: %1, %2").arg(path, file.errorString());
         }
         return false;
     }
-    Logger::instance().log(Logger::Info, QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE6\x96\x87\xE4\xBB\xB6\x3A\x20%1").arg(path));
+    Logger::instance().log(Logger::Info, QString(u8"已删除文件: %1").arg(path));
     return true;
 }
 
@@ -903,7 +903,7 @@ bool MainWindow::removeOkImageAt(int row, QString *errorMessage)
 {
     if (row < 0 || row >= m_project.okImages.size()) {
         if (errorMessage) {
-            *errorMessage = QString::fromUtf8(u8"OK \xE5\x9B\xBE\xE5\x83\x8F\xE7\xB4\xA2\xE5\xBC\x95\xE6\x97\xA0\xE6\x95\x88");
+            *errorMessage = QString(u8"OK 图像索引无效");
         }
         return false;
     }
@@ -923,7 +923,7 @@ bool MainWindow::removeAssetAt(int row, QString *errorMessage)
 {
     if (row < 0 || row >= m_project.defectAssets.size()) {
         if (errorMessage) {
-            *errorMessage = QString::fromUtf8(u8"\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90\xE7\xB4\xA2\xE5\xBC\x95\xE6\x97\xA0\xE6\x95\x88");
+            *errorMessage = QString(u8"缺陷素材索引无效");
         }
         return false;
     }
@@ -965,7 +965,7 @@ bool MainWindow::removeGeneratedFileSet(const QString &imagePath, QString *error
 bool MainWindow::confirmDelete(const QString &message) const
 {
     return QMessageBox::question(const_cast<MainWindow *>(this),
-                                 QString::fromUtf8(u8"\xE7\xA1\xAE\xE8\xAE\xA4\xE5\x88\xA0\xE9\x99\xA4"),
+                                 QString(u8"确认删除"),
                                  message,
                                  QMessageBox::Yes | QMessageBox::No,
                                  QMessageBox::No) == QMessageBox::Yes;

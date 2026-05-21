@@ -52,7 +52,7 @@ bool ensureParentDir(const QString &filePath, QString *errorMessage)
     const QFileInfo fileInfo(filePath);
     if (fileInfo.fileName().isEmpty()) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Output file name is empty.");
+            *errorMessage = QString(u8"输出文件名为空.");
         }
         return false;
     }
@@ -60,7 +60,7 @@ bool ensureParentDir(const QString &filePath, QString *errorMessage)
     QDir dir(fileInfo.absolutePath());
     if (!dir.exists() && !dir.mkpath(QStringLiteral("."))) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Failed to create output directory: %1").arg(dir.absolutePath());
+            *errorMessage = QString(u8"创建输出目录失败: %1").arg(dir.absolutePath());
         }
         return false;
     }
@@ -72,7 +72,7 @@ bool allocImage(sd_image_t *image, int width, int height, int channel, QString *
     const qsizetype byteCount = qsizetype(width) * qsizetype(height) * qsizetype(channel);
     if (byteCount <= 0) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Invalid image allocation size.");
+            *errorMessage = QString(u8"图像缓存大小无效.");
         }
         return false;
     }
@@ -80,7 +80,7 @@ bool allocImage(sd_image_t *image, int width, int height, int channel, QString *
     image->data = static_cast<uint8_t *>(std::malloc(size_t(byteCount)));
     if (!image->data) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Failed to allocate image buffer.");
+            *errorMessage = QString(u8"分配图像缓存失败.");
         }
         return false;
     }
@@ -95,7 +95,7 @@ bool loadRgbImage(const QString &path, int expectedWidth, int expectedHeight, Ow
     QImage src(path);
     if (src.isNull()) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Failed to load image: %1").arg(path);
+            *errorMessage = QString(u8"加载图像失败: %1").arg(path);
         }
         return false;
     }
@@ -123,7 +123,7 @@ bool loadMaskImage(const QString &path, int expectedWidth, int expectedHeight, O
     QImage src(path);
     if (src.isNull()) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Failed to load mask image: %1").arg(path);
+            *errorMessage = QString(u8"加载 Mask 图失败: %1").arg(path);
         }
         return false;
     }
@@ -154,14 +154,14 @@ bool loadMaskImage(const QString &path, int expectedWidth, int expectedHeight, O
     if (whiteCount <= 0) {
         std::free(image.data);
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Mask has no white repair area after thresholding: %1").arg(path);
+            *errorMessage = QString(u8"Mask 二值化后没有白色修复区域: %1").arg(path);
         }
         return false;
     }
     if (whiteCount >= pixelCount * 8 / 10) {
         std::free(image.data);
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Mask repair area is too large after thresholding. Use a black background with white local repair area: %1").arg(path);
+            *errorMessage = QString(u8"Mask 二值化后修复区域过大. 请使用黑色背景和白色局部修复区域: %1").arg(path);
         }
         return false;
     }
@@ -174,7 +174,7 @@ bool saveSdImage(const sd_image_t &image, const QString &path, QString *errorMes
 {
     if (!image.data || image.width == 0 || image.height == 0 || image.channel == 0) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Generated image is empty.");
+            *errorMessage = QString(u8"生成图像为空.");
         }
         return false;
     }
@@ -200,20 +200,20 @@ bool saveSdImage(const sd_image_t &image, const QString &path, QString *errorMes
                      QImage::Format_Grayscale8).copy();
     } else {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Unsupported generated image channel count: %1").arg(image.channel);
+            *errorMessage = QString(u8"生成图像通道数不支持: %1").arg(image.channel);
         }
         return false;
     }
 
     if (out.isNull()) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Failed to convert generated image.");
+            *errorMessage = QString(u8"转换生成图像失败.");
         }
         return false;
     }
     if (!out.save(path, "PNG")) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Failed to save output image: %1").arg(path);
+            *errorMessage = QString(u8"保存输出图像失败: %1").arg(path);
         }
         return false;
     }
@@ -279,7 +279,7 @@ SdGenerateResult StableDiffusionEngine::generateInpaint(const SdGenerateRequest 
 QString StableDiffusionEngine::systemInfo() const
 {
     const char *info = sd_get_system_info();
-    return info ? QString::fromUtf8(info) : QStringLiteral("stable-diffusion.cpp system info unavailable.");
+    return info ? QString::fromUtf8(info) : QString(u8"stable-diffusion.cpp 系统信息不可用.");
 }
 
 void StableDiffusionEngine::clearContext()
@@ -295,18 +295,18 @@ SdGenerateResult StableDiffusionEngine::generate(const SdGenerateRequest &reques
     QString error;
     if (!validateRequest(request, &error)) {
         result.errorMessage = error;
-        log(QStringLiteral("ERROR: %1").arg(error));
+        log(QString(u8"错误: %1").arg(error));
         return result;
     }
     if (!ensureParentDir(request.outputPath, &error)) {
         result.errorMessage = error;
-        log(QStringLiteral("ERROR: %1").arg(error));
+        log(QString(u8"错误: %1").arg(error));
         return result;
     }
     const bool vaeDecodeOnly = !request.inpaint;
     if (!ensureContext(request.modelPath, vaeDecodeOnly, &error)) {
         result.errorMessage = error;
-        log(QStringLiteral("ERROR: %1").arg(error));
+        log(QString(u8"错误: %1").arg(error));
         return result;
     }
 
@@ -315,12 +315,12 @@ SdGenerateResult StableDiffusionEngine::generate(const SdGenerateRequest &reques
     if (request.inpaint) {
         if (!loadRgbImage(request.initImagePath, request.width, request.height, &initImage, &error)) {
             result.errorMessage = error;
-            log(QStringLiteral("ERROR: %1").arg(error));
+            log(QString(u8"错误: %1").arg(error));
             return result;
         }
         if (!loadMaskImage(request.maskImagePath, request.width, request.height, &maskImage, &error)) {
             result.errorMessage = error;
-            log(QStringLiteral("ERROR: %1").arg(error));
+            log(QString(u8"错误: %1").arg(error));
             return result;
         }
     }
@@ -351,7 +351,7 @@ SdGenerateResult StableDiffusionEngine::generate(const SdGenerateRequest &reques
         params.mask_image = maskImage.image();
     }
 
-    log(QStringLiteral("Start generation. model=%1 size=%2x%3 steps=%4 seed=%5")
+    log(QString(u8"开始生成. model=%1 size=%2x%3 steps=%4 seed=%5")
             .arg(request.modelPath)
             .arg(request.width)
             .arg(request.height)
@@ -366,21 +366,21 @@ SdGenerateResult StableDiffusionEngine::generate(const SdGenerateRequest &reques
     s_callbackTarget = nullptr;
 
     if (!images) {
-        result.errorMessage = QStringLiteral("stable-diffusion.cpp generate_image returned null.");
-        log(QStringLiteral("ERROR: %1").arg(result.errorMessage));
+        result.errorMessage = QString(u8"stable-diffusion.cpp generate_image 返回空结果.");
+        log(QString(u8"错误: %1").arg(result.errorMessage));
         return result;
     }
 
     if (!saveSdImage(images[0], request.outputPath, &error)) {
         freeGeneratedImages(images, 1);
         result.errorMessage = error;
-        log(QStringLiteral("ERROR: %1").arg(error));
+        log(QString(u8"错误: %1").arg(error));
         return result;
     }
 
     freeGeneratedImages(images, 1);
     result.success = true;
-    log(QStringLiteral("Output saved: %1").arg(request.outputPath));
+    log(QString(u8"输出已保存: %1").arg(request.outputPath));
     return result;
 }
 
@@ -388,50 +388,50 @@ bool StableDiffusionEngine::validateRequest(const SdGenerateRequest &request, QS
 {
     if (request.modelPath.trimmed().isEmpty()) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Model path is empty.");
+            *errorMessage = QString(u8"模型路径为空.");
         }
         return false;
     }
     if (!QFileInfo::exists(request.modelPath)) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Model file does not exist: %1").arg(request.modelPath);
+            *errorMessage = QString(u8"模型文件不存在: %1").arg(request.modelPath);
         }
         return false;
     }
     if (request.prompt.trimmed().isEmpty()) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Prompt is empty.");
+            *errorMessage = QString(u8"提示词为空.");
         }
         return false;
     }
     if (request.width <= 0 || request.height <= 0 || request.width % 64 != 0 || request.height % 64 != 0) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Width and height must be positive multiples of 64.");
+            *errorMessage = QString(u8"宽度和高度必须是大于 0 的 64 倍数.");
         }
         return false;
     }
     if (request.steps <= 0) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Steps must be greater than zero.");
+            *errorMessage = QString(u8"步数必须大于 0.");
         }
         return false;
     }
     if (request.outputPath.trimmed().isEmpty()) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Output path is empty.");
+            *errorMessage = QString(u8"输出路径为空.");
         }
         return false;
     }
     if (request.inpaint) {
         if (!QFileInfo::exists(request.initImagePath)) {
             if (errorMessage) {
-                *errorMessage = QStringLiteral("Init image file does not exist: %1").arg(request.initImagePath);
+                *errorMessage = QString(u8"原图文件不存在: %1").arg(request.initImagePath);
             }
             return false;
         }
         if (!QFileInfo::exists(request.maskImagePath)) {
             if (errorMessage) {
-                *errorMessage = QStringLiteral("Mask image file does not exist: %1").arg(request.maskImagePath);
+                *errorMessage = QString(u8"Mask 图文件不存在: %1").arg(request.maskImagePath);
             }
             return false;
         }
@@ -457,29 +457,29 @@ bool StableDiffusionEngine::ensureContext(const QString &modelPath, bool vaeDeco
     params.sampler_rng_type = CUDA_RNG;
     params.enable_mmap = true;
     params.vae_decode_only = vaeDecodeOnly;
-    params.free_params_immediately = true;
+    params.free_params_immediately = false;
 
-    log(QStringLiteral("Loading model context: %1, vae_decode_only=%2")
+    log(QString(u8"正在加载模型上下文: %1, vae_decode_only=%2")
             .arg(normalized)
             .arg(vaeDecodeOnly ? QStringLiteral("true") : QStringLiteral("false")));
     m_context = new_sd_ctx(&params);
     if (!m_context) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Failed to initialize stable-diffusion.cpp context for model: %1").arg(normalized);
+            *errorMessage = QString(u8"初始化 stable-diffusion.cpp 上下文失败, model=%1").arg(normalized);
         }
         return false;
     }
     if (!sd_ctx_supports_image_generation(m_context)) {
         releaseContext();
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Loaded model does not support image generation: %1").arg(normalized);
+            *errorMessage = QString(u8"已加载模型不支持图像生成: %1").arg(normalized);
         }
         return false;
     }
 
     m_contextModelPath = normalized;
     m_contextVaeDecodeOnly = vaeDecodeOnly;
-    log(QStringLiteral("Model context loaded."));
+    log(QString(u8"模型上下文加载完成."));
     return true;
 }
 
@@ -513,7 +513,7 @@ void StableDiffusionEngine::sdProgressCallback(int step, int steps, float time, 
     if (!s_callbackTarget) {
         return;
     }
-    emit s_callbackTarget->progressMessage(QStringLiteral("Step %1/%2, %3 ms")
+    emit s_callbackTarget->progressMessage(QString(u8"步数 %1/%2, %3 ms")
                                                .arg(step)
                                                .arg(steps)
                                                .arg(double(time), 0, 'f', 2));

@@ -45,7 +45,7 @@ bool ImageView::loadImage(const QString &path, QString *errorMessage)
     QImage image(path);
     if (image.isNull()) {
         if (errorMessage) {
-            *errorMessage = QString::fromUtf8(u8"\xE5\x8A\xA0\xE8\xBD\xBD\xE5\x9B\xBE\xE5\x83\x8F\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(path);
+            *errorMessage = QString(u8"加载图像失败: %1").arg(path);
         }
         return false;
     }
@@ -87,13 +87,13 @@ bool ImageView::saveMask(const QString &path, QString *errorMessage) const
 {
     if (m_mask.isNull()) {
         if (errorMessage) {
-            *errorMessage = QString::fromUtf8(u8"mask \xE4\xB8\xBA\xE7\xA9\xBA");
+            *errorMessage = QString(u8"mask 为空");
         }
         return false;
     }
     if (!m_mask.save(path, "PNG")) {
         if (errorMessage) {
-            *errorMessage = QString::fromUtf8(u8"\xE4\xBF\x9D\xE5\xAD\x98\x20mask\x20\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(path);
+            *errorMessage = QString(u8"保存 mask 失败: %1").arg(path);
         }
         return false;
     }
@@ -170,7 +170,7 @@ void ImageView::mousePressEvent(QMouseEvent *event)
     } else if (m_toolMode == PolygonMode) {
         m_polygonPoints.append(imagePoint);
         updatePolygonPreview(imagePoint);
-        emit statusTextChanged(QString::fromUtf8(u8"\xE5\xA4\x9A\xE8\xBE\xB9\xE5\xBD\xA2\xE7\x82\xB9\xE6\x95\xB0: %1").arg(m_polygonPoints.size()));
+        emit statusTextChanged(QString(u8"多边形点数: %1").arg(m_polygonPoints.size()));
     }
 }
 
@@ -343,7 +343,7 @@ void ImageView::updateRectPreview(const QPoint &start, const QPoint &end)
 void ImageView::finishPolygon()
 {
     if (m_polygonPoints.size() < 3) {
-        emit statusTextChanged(QString::fromUtf8(u8"\xE5\xA4\x9A\xE8\xBE\xB9\xE5\xBD\xA2\xE8\x87\xB3\xE5\xB0\x91\xE9\x9C\x80\xE8\xA6\x81 3 \xE4\xB8\xAA\xE7\x82\xB9"));
+        emit statusTextChanged(QString(u8"多边形至少需要 3 个点"));
         return;
     }
     QPolygon polygon(m_polygonPoints);

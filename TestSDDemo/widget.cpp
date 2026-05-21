@@ -17,14 +17,14 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
-    setWindowTitle(QStringLiteral("TestSDDemo - stable-diffusion.cpp"));
+    setWindowTitle(QString(u8"Stable Diffusion 测试 - stable-diffusion.cpp"));
 
     ui->textModelEdit->setText(QDir(defaultCkptDir()).filePath(QStringLiteral("v1-5-pruned-emaonly.safetensors")));
     ui->inpaintModelEdit->setText(QDir(defaultCkptDir()).filePath(QStringLiteral("sd-v1-5-inpainting.safetensors")));
     ui->outputDirEdit->setText(defaultOutputDir());
     ui->promptEdit->setPlainText(QStringLiteral("industrial surface defect, realistic macro photo, sharp edge detail"));
     ui->negativePromptEdit->setPlainText(QStringLiteral("low quality, blurry, watermark, text"));
-    ui->previewLabel->setText(QStringLiteral("No output"));
+    ui->previewLabel->setText(QString(u8"暂无输出"));
 
     m_engine = new StableDiffusionEngine();
     const QString systemInfo = m_engine->systemInfo();
@@ -42,8 +42,8 @@ Widget::Widget(QWidget *parent)
     connect(ui->generateTextButton, &QPushButton::clicked, this, &Widget::generateTextImage);
     connect(ui->generateInpaintButton, &QPushButton::clicked, this, &Widget::generateInpaintImage);
 
-    appendLog(QStringLiteral("TestSDDemo ready."));
-    appendLog(QStringLiteral("Linked stable-diffusion.cpp library: CUDA build."));
+    appendLog(QString(u8"TestSDDemo 已就绪."));
+    appendLog(QString(u8"已链接 stable-diffusion.cpp CUDA 版本."));
     appendLog(systemInfo);
 }
 
@@ -57,9 +57,9 @@ Widget::~Widget()
 void Widget::browseTextModel()
 {
     const QString file = QFileDialog::getOpenFileName(this,
-                                                      QStringLiteral("Select text-to-image model"),
+                                                      QString(u8"选择 Txt2Img 模型"),
                                                       defaultCkptDir(),
-                                                      QStringLiteral("Models (*.safetensors *.ckpt *.gguf);;All files (*.*)"));
+                                                      QString(u8"模型 (*.safetensors *.ckpt *.gguf);;所有文件 (*.*)"));
     if (!file.isEmpty()) {
         ui->textModelEdit->setText(file);
     }
@@ -68,9 +68,9 @@ void Widget::browseTextModel()
 void Widget::browseInpaintModel()
 {
     const QString file = QFileDialog::getOpenFileName(this,
-                                                      QStringLiteral("Select inpaint model"),
+                                                      QString(u8"选择 Inpaint 模型"),
                                                       defaultCkptDir(),
-                                                      QStringLiteral("Models (*.safetensors *.ckpt *.gguf);;All files (*.*)"));
+                                                      QString(u8"模型 (*.safetensors *.ckpt *.gguf);;所有文件 (*.*)"));
     if (!file.isEmpty()) {
         ui->inpaintModelEdit->setText(file);
     }
@@ -79,9 +79,9 @@ void Widget::browseInpaintModel()
 void Widget::browseInitImage()
 {
     const QString file = QFileDialog::getOpenFileName(this,
-                                                      QStringLiteral("Select init image"),
+                                                      QString(u8"选择原图"),
                                                       QString(),
-                                                      QStringLiteral("Images (*.png *.jpg *.jpeg *.bmp);;All files (*.*)"));
+                                                      QString(u8"图像 (*.png *.jpg *.jpeg *.bmp);;所有文件 (*.*)"));
     if (!file.isEmpty()) {
         ui->initImageEdit->setText(file);
     }
@@ -90,9 +90,9 @@ void Widget::browseInitImage()
 void Widget::browseMaskImage()
 {
     const QString file = QFileDialog::getOpenFileName(this,
-                                                      QStringLiteral("Select mask image"),
+                                                      QString(u8"选择 Mask 图"),
                                                       QString(),
-                                                      QStringLiteral("Images (*.png *.jpg *.jpeg *.bmp);;All files (*.*)"));
+                                                      QString(u8"图像 (*.png *.jpg *.jpeg *.bmp);;所有文件 (*.*)"));
     if (!file.isEmpty()) {
         ui->maskImageEdit->setText(file);
     }
@@ -101,7 +101,7 @@ void Widget::browseMaskImage()
 void Widget::browseOutputDir()
 {
     const QString dir = QFileDialog::getExistingDirectory(this,
-                                                          QStringLiteral("Select output directory"),
+                                                          QString(u8"选择输出目录"),
                                                           ui->outputDirEdit->text());
     if (!dir.isEmpty()) {
         ui->outputDirEdit->setText(dir);
@@ -181,14 +181,14 @@ QString Widget::makeOutputPath(const QString &prefix) const
 void Widget::runRequest(const SdGenerateRequest &request)
 {
     if (m_generationRunning) {
-        appendLog(QStringLiteral("A generation task is already running."));
+        appendLog(QString(u8"已有生成任务正在执行."));
         return;
     }
 
     setBusy(true);
     m_generationRunning = true;
-    ui->progressLabel->setText(QStringLiteral("Running..."));
-    appendLog(QStringLiteral("Request queued: %1").arg(request.inpaint ? QStringLiteral("inpaint") : QStringLiteral("txt2img")));
+    ui->progressLabel->setText(QString(u8"运行中..."));
+    appendLog(QString(u8"任务已加入后台: %1").arg(request.inpaint ? QStringLiteral("Inpaint") : QStringLiteral("Txt2Img")));
 
     StableDiffusionEngine *engine = m_engine;
     QPointer<Widget> guard(this);
@@ -212,12 +212,12 @@ void Widget::handleGenerationFinished(const SdGenerateResult &result)
     m_generationRunning = false;
     setBusy(false);
     if (!result.success) {
-        ui->progressLabel->setText(QStringLiteral("Failed"));
+        ui->progressLabel->setText(QString(u8"失败"));
         showError(result.errorMessage);
         return;
     }
 
-    ui->progressLabel->setText(QStringLiteral("Done"));
+    ui->progressLabel->setText(QString(u8"完成"));
     showOutputImage(result.outputPath);
 }
 
@@ -241,16 +241,16 @@ void Widget::showOutputImage(const QString &path)
 {
     QPixmap pixmap(path);
     if (pixmap.isNull()) {
-        showError(QStringLiteral("Generated file cannot be previewed: %1").arg(path));
+        showError(QString(u8"生成文件无法预览: %1").arg(path));
         return;
     }
     ui->previewLabel->setPixmap(pixmap.scaled(ui->previewLabel->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    appendLog(QStringLiteral("Preview loaded: %1").arg(path));
+    appendLog(QString(u8"预览已加载: %1").arg(path));
 }
 
 void Widget::showError(const QString &message)
 {
-    appendLog(QStringLiteral("ERROR: %1").arg(message));
-    QMessageBox::critical(this, QStringLiteral("Error"), message);
+    appendLog(QString(u8"错误: %1").arg(message));
+    QMessageBox::critical(this, QString(u8"错误"), message);
 }
 

@@ -339,7 +339,8 @@ bool OpenCvDefectTransferBackend::placeOneDefect(const AssetMat &asset,
     cv::Mat defectFloat;
     canvasRoi.convertTo(baseFloat, CV_32FC3);
     finalImage.convertTo(defectFloat, CV_32FC3);
-    cv::Mat inverseAlpha = cv::Mat::ones(alpha3.size(), alpha3.type()) - alpha3;
+    cv::Mat inverseAlpha(alpha3.size(), alpha3.type(), cv::Scalar::all(1.0));
+    inverseAlpha -= alpha3;
     cv::Mat blended = defectFloat.mul(alpha3) + baseFloat.mul(inverseAlpha);
     cv::Mat blended8;
     blended.convertTo(blended8, CV_8UC3);

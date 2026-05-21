@@ -11,19 +11,19 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>TestSDDemo</string>
+    <string>Stable Diffusion 测试</string>
   </property>
   <layout class="QVBoxLayout" name="mainLayout">
    <item>
     <widget class="QGroupBox" name="modelGroup">
      <property name="title">
-      <string>Models and Output</string>
+       <string>模型和输出</string>
      </property>
      <layout class="QGridLayout" name="modelLayout">
       <item row="0" column="0">
        <widget class="QLabel" name="textModelLabel">
         <property name="text">
-         <string>Txt2Img model</string>
+          <string>Txt2Img 模型</string>
         </property>
        </widget>
       </item>
@@ -33,14 +33,14 @@
       <item row="0" column="2">
        <widget class="QPushButton" name="browseTextModelButton">
         <property name="text">
-         <string>Browse</string>
+          <string>浏览</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="inpaintModelLabel">
         <property name="text">
-         <string>Inpaint model</string>
+          <string>Inpaint 模型</string>
         </property>
        </widget>
       </item>
@@ -50,14 +50,14 @@
       <item row="1" column="2">
        <widget class="QPushButton" name="browseInpaintModelButton">
         <property name="text">
-         <string>Browse</string>
+          <string>浏览</string>
         </property>
        </widget>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="outputDirLabel">
         <property name="text">
-         <string>Output dir</string>
+          <string>输出目录</string>
         </property>
        </widget>
       </item>
@@ -67,7 +67,7 @@
       <item row="2" column="2">
        <widget class="QPushButton" name="browseOutputButton">
         <property name="text">
-         <string>Browse</string>
+          <string>浏览</string>
         </property>
        </widget>
       </item>
@@ -81,13 +81,13 @@
        <item>
         <widget class="QGroupBox" name="promptGroup">
          <property name="title">
-          <string>Prompt</string>
+           <string>提示词</string>
          </property>
          <layout class="QGridLayout" name="promptLayout">
           <item row="0" column="0">
            <widget class="QLabel" name="promptLabel">
             <property name="text">
-             <string>Prompt</string>
+              <string>正向提示词</string>
             </property>
            </widget>
           </item>
@@ -104,7 +104,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="negativePromptLabel">
             <property name="text">
-             <string>Negative</string>
+              <string>反向提示词</string>
             </property>
            </widget>
           </item>
@@ -124,13 +124,13 @@
        <item>
         <widget class="QGroupBox" name="paramsGroup">
          <property name="title">
-          <string>Parameters</string>
+           <string>参数</string>
          </property>
          <layout class="QGridLayout" name="paramsLayout">
           <item row="0" column="0">
            <widget class="QLabel" name="widthLabel">
             <property name="text">
-             <string>Width</string>
+              <string>宽度</string>
             </property>
            </widget>
           </item>
@@ -153,7 +153,7 @@
           <item row="0" column="2">
            <widget class="QLabel" name="heightLabel">
             <property name="text">
-             <string>Height</string>
+              <string>高度</string>
             </property>
            </widget>
           </item>
@@ -176,7 +176,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="stepsLabel">
             <property name="text">
-             <string>Steps</string>
+              <string>步数</string>
             </property>
            </widget>
           </item>
@@ -196,7 +196,7 @@
           <item row="1" column="2">
            <widget class="QLabel" name="seedLabel">
             <property name="text">
-             <string>Seed</string>
+              <string>随机种子</string>
             </property>
            </widget>
           </item>
@@ -242,7 +242,7 @@
           <item row="2" column="2">
            <widget class="QLabel" name="strengthLabel">
             <property name="text">
-             <string>Strength</string>
+              <string>重绘强度</string>
             </property>
            </widget>
           </item>
@@ -271,13 +271,13 @@
        <item>
         <widget class="QGroupBox" name="inpaintInputGroup">
          <property name="title">
-          <string>Inpaint Input</string>
+           <string>Inpaint 输入</string>
          </property>
          <layout class="QGridLayout" name="inpaintInputLayout">
           <item row="0" column="0">
            <widget class="QLabel" name="initImageLabel">
             <property name="text">
-             <string>Init image</string>
+              <string>原图</string>
             </property>
            </widget>
           </item>
@@ -287,14 +287,14 @@
           <item row="0" column="2">
            <widget class="QPushButton" name="browseInitButton">
             <property name="text">
-             <string>Browse</string>
+              <string>浏览</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="maskImageLabel">
             <property name="text">
-             <string>Mask image</string>
+              <string>Mask 图</string>
             </property>
            </widget>
           </item>
@@ -304,7 +304,7 @@
           <item row="1" column="2">
            <widget class="QPushButton" name="browseMaskButton">
             <property name="text">
-             <string>Browse</string>
+              <string>浏览</string>
             </property>
            </widget>
           </item>
@@ -322,7 +322,7 @@
             </size>
            </property>
            <property name="text">
-            <string>Generate Txt2Img</string>
+             <string>生成 Txt2Img</string>
            </property>
           </widget>
          </item>
@@ -335,14 +335,14 @@
             </size>
            </property>
            <property name="text">
-            <string>Generate Inpaint</string>
+             <string>生成 Inpaint</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QLabel" name="progressLabel">
            <property name="text">
-            <string>Idle</string>
+             <string>空闲</string>
            </property>
           </widget>
          </item>
@@ -378,7 +378,7 @@
         <set>Qt::AlignCenter</set>
        </property>
        <property name="text">
-        <string>No output</string>
+         <string>暂无输出</string>
        </property>
       </widget>
      </item>
