@@ -27,7 +27,7 @@
         </property>
         <widget class="QWidget" name="okTab">
          <attribute name="title">
-          <string>OK Images</string>
+          <string>OK&#x56FE;&#x50CF;</string>
          </attribute>
          <layout class="QVBoxLayout" name="okTabLayout">
           <item>
@@ -37,7 +37,7 @@
         </widget>
         <widget class="QWidget" name="defectTab">
          <attribute name="title">
-          <string>Defect Sources</string>
+          <string>&#x7F3A;&#x9677;&#x6E90;&#x56FE;</string>
          </attribute>
          <layout class="QVBoxLayout" name="defectTabLayout">
           <item>
@@ -47,7 +47,7 @@
         </widget>
         <widget class="QWidget" name="assetTab">
          <attribute name="title">
-          <string>Assets</string>
+          <string>&#x7F3A;&#x9677;&#x7D20;&#x6750;</string>
          </attribute>
          <layout class="QVBoxLayout" name="assetTabLayout">
           <item>
@@ -57,7 +57,7 @@
         </widget>
         <widget class="QWidget" name="generatedTab">
          <attribute name="title">
-          <string>Generated</string>
+          <string>&#x751F;&#x6210;&#x7ED3;&#x679C;</string>
          </attribute>
          <layout class="QVBoxLayout" name="generatedTabLayout">
           <item>
@@ -82,48 +82,48 @@
         <item>
          <widget class="QGroupBox" name="annotationGroup">
           <property name="title">
-           <string>Annotation</string>
+            <string>&#x6807;&#x6CE8;</string>
           </property>
           <layout class="QGridLayout" name="annotationLayout">
            <item row="0" column="0">
             <widget class="QPushButton" name="viewButton">
              <property name="text">
-              <string>View</string>
+               <string>&#x67E5;&#x770B;</string>
              </property>
             </widget>
            </item>
            <item row="0" column="1">
             <widget class="QPushButton" name="rectButton">
              <property name="text">
-              <string>Rect</string>
+               <string>&#x77E9;&#x5F62;</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
             <widget class="QPushButton" name="polygonButton">
              <property name="text">
-              <string>Polygon</string>
+               <string>&#x591A;&#x8FB9;&#x5F62;</string>
              </property>
             </widget>
            </item>
            <item row="1" column="1">
             <widget class="QPushButton" name="brushButton">
              <property name="text">
-              <string>Brush</string>
+               <string>&#x753B;&#x7B14;</string>
              </property>
             </widget>
            </item>
            <item row="2" column="0">
             <widget class="QPushButton" name="eraserButton">
              <property name="text">
-              <string>Eraser</string>
+               <string>&#x6A61;&#x76AE;</string>
              </property>
             </widget>
            </item>
            <item row="2" column="1">
             <widget class="QPushButton" name="clearMaskButton">
              <property name="text">
-              <string>Clear</string>
+               <string>&#x6E05;&#x7A7A;</string>
              </property>
             </widget>
            </item>
@@ -143,14 +143,14 @@
            <item row="4" column="0" colspan="2">
             <widget class="QLineEdit" name="defectTypeEdit">
              <property name="placeholderText">
-              <string>defect type</string>
+               <string>&#x7F3A;&#x9677;&#x7C7B;&#x578B;</string>
              </property>
             </widget>
            </item>
            <item row="5" column="0" colspan="2">
             <widget class="QPushButton" name="saveAssetButton">
              <property name="text">
-              <string>Save Defect Asset</string>
+               <string>&#x4FDD;&#x5B58;&#x7F3A;&#x9677;&#x7D20;&#x6750;</string>
              </property>
             </widget>
            </item>
@@ -160,13 +160,13 @@
         <item>
          <widget class="QGroupBox" name="generateGroup">
           <property name="title">
-           <string>Generate</string>
+            <string>&#x751F;&#x6210;</string>
           </property>
           <layout class="QFormLayout" name="generateLayout">
            <item row="0" column="0">
             <widget class="QLabel" name="countLabel">
              <property name="text">
-              <string>Count</string>
+               <string>&#x6570;&#x91CF;</string>
              </property>
             </widget>
            </item>
@@ -186,7 +186,7 @@
            <item row="1" column="0">
             <widget class="QLabel" name="defectMinLabel">
              <property name="text">
-              <string>Defects min</string>
+               <string>&#x7F3A;&#x9677;&#x6570;&#x6700;&#x5C0F;</string>
              </property>
             </widget>
            </item>
@@ -206,7 +206,7 @@
            <item row="2" column="0">
             <widget class="QLabel" name="defectMaxLabel">
              <property name="text">
-              <string>Defects max</string>
+               <string>&#x7F3A;&#x9677;&#x6570;&#x6700;&#x5927;</string>
              </property>
             </widget>
            </item>
@@ -226,7 +226,7 @@
            <item row="3" column="0">
             <widget class="QLabel" name="seedLabel">
              <property name="text">
-              <string>Seed</string>
+               <string>&#x968F;&#x673A;&#x79CD;&#x5B50;</string>
              </property>
             </widget>
            </item>
@@ -246,7 +246,7 @@
            <item row="4" column="0">
             <widget class="QLabel" name="generateTypeLabel">
              <property name="text">
-              <string>Defect type</string>
+               <string>&#x7F3A;&#x9677;&#x7C7B;&#x578B;</string>
              </property>
             </widget>
            </item>
@@ -256,7 +256,7 @@
            <item row="5" column="0">
             <widget class="QLabel" name="scaleMinLabel">
              <property name="text">
-              <string>Scale min</string>
+               <string>&#x7F29;&#x653E;&#x6700;&#x5C0F;</string>
              </property>
             </widget>
            </item>
@@ -279,7 +279,7 @@
            <item row="6" column="0">
             <widget class="QLabel" name="scaleMaxLabel">
              <property name="text">
-              <string>Scale max</string>
+               <string>&#x7F29;&#x653E;&#x6700;&#x5927;</string>
              </property>
             </widget>
            </item>
@@ -302,7 +302,7 @@
            <item row="7" column="0">
             <widget class="QLabel" name="rotationMinLabel">
              <property name="text">
-              <string>Rotation min</string>
+               <string>&#x65CB;&#x8F6C;&#x6700;&#x5C0F;</string>
              </property>
             </widget>
            </item>
@@ -322,7 +322,7 @@
            <item row="8" column="0">
             <widget class="QLabel" name="rotationMaxLabel">
              <property name="text">
-              <string>Rotation max</string>
+               <string>&#x65CB;&#x8F6C;&#x6700;&#x5927;</string>
              </property>
             </widget>
            </item>
@@ -342,7 +342,7 @@
            <item row="9" column="0">
             <widget class="QLabel" name="brightnessMinLabel">
              <property name="text">
-              <string>Brightness min</string>
+               <string>&#x4EAE;&#x5EA6;&#x6700;&#x5C0F;</string>
              </property>
             </widget>
            </item>
@@ -362,7 +362,7 @@
            <item row="10" column="0">
             <widget class="QLabel" name="brightnessMaxLabel">
              <property name="text">
-              <string>Brightness max</string>
+               <string>&#x4EAE;&#x5EA6;&#x6700;&#x5927;</string>
              </property>
             </widget>
            </item>
@@ -382,7 +382,7 @@
            <item row="11" column="0">
             <widget class="QLabel" name="featherMinLabel">
              <property name="text">
-              <string>Feather min</string>
+               <string>&#x7FBD;&#x5316;&#x6700;&#x5C0F;</string>
              </property>
             </widget>
            </item>
@@ -402,7 +402,7 @@
            <item row="12" column="0">
             <widget class="QLabel" name="featherMaxLabel">
              <property name="text">
-              <string>Feather max</string>
+               <string>&#x7FBD;&#x5316;&#x6700;&#x5927;</string>
              </property>
             </widget>
            </item>
@@ -422,7 +422,7 @@
            <item row="13" column="0" colspan="2">
             <widget class="QPushButton" name="generateButton">
              <property name="text">
-              <string>Generate OpenCV</string>
+               <string>OpenCV &#x751F;&#x6210;</string>
              </property>
             </widget>
            </item>
@@ -432,30 +432,40 @@
         <item>
          <widget class="QGroupBox" name="reviewGroup">
           <property name="title">
-           <string>Review</string>
+            <string>&#x5BA1;&#x6838;</string>
           </property>
-          <layout class="QHBoxLayout" name="reviewLayout">
-           <item>
-            <widget class="QPushButton" name="approveButton">
+           <layout class="QHBoxLayout" name="reviewLayout">
+            <item>
+             <widget class="QPushButton" name="approveButton">
              <property name="text">
-              <string>Approve</string>
+               <string>&#x901A;&#x8FC7;</string>
              </property>
             </widget>
            </item>
-           <item>
-            <widget class="QPushButton" name="rejectButton">
+            <item>
+             <widget class="QPushButton" name="rejectButton">
              <property name="text">
-              <string>Reject</string>
+               <string>&#x5E9F;&#x5F03;</string>
              </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="showGeneratedMaskCheck">
+              <property name="text">
+               <string>&#x663E;&#x793A; mask</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="exportButton">
           <property name="text">
-           <string>Export Approved Dataset</string>
+            <string>&#x5BFC;&#x51FA;&#x901A;&#x8FC7;&#x6570;&#x636E;&#x96C6;</string>
           </property>
          </widget>
         </item>
@@ -502,7 +512,7 @@
    </property>
    <widget class="QMenu" name="fileMenu">
     <property name="title">
-     <string>File</string>
+     <string>&#x6587;&#x4EF6;</string>
     </property>
     <addaction name="newProjectAction"/>
     <addaction name="openProjectAction"/>
@@ -514,22 +524,22 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="newProjectAction">
    <property name="text">
-    <string>New Project</string>
+     <string>&#x65B0;&#x5EFA;&#x9879;&#x76EE;</string>
    </property>
   </action>
   <action name="openProjectAction">
    <property name="text">
-    <string>Open Project</string>
+     <string>&#x6253;&#x5F00;&#x9879;&#x76EE;</string>
    </property>
   </action>
   <action name="importOkAction">
    <property name="text">
-    <string>Import OK Images</string>
+     <string>&#x5BFC;&#x5165; OK &#x56FE;&#x50CF;</string>
    </property>
   </action>
   <action name="importDefectAction">
    <property name="text">
-    <string>Import Defect Sources</string>
+     <string>&#x5BFC;&#x5165;&#x7F3A;&#x9677;&#x6E90;&#x56FE;</string>
    </property>
   </action>
  </widget>

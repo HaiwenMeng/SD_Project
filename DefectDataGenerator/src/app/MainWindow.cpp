@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->generatedListView->setContextMenuPolicy(Qt::CustomContextMenu);
     setupConnections();
     connect(&Logger::instance(), &Logger::messageLogged, this, &MainWindow::appendLog);
-    appendLog(QStringLiteral("Ready."));
+    appendLog(QString::fromUtf8(u8"\xE5\x87\x86\xE5\xA4\x87\xE5\xB0\xB1\xE7\xBB\xAA"));
 }
 
 MainWindow::~MainWindow()
@@ -55,6 +55,7 @@ void MainWindow::setupConnections()
     connect(ui->generateButton, &QPushButton::clicked, this, &MainWindow::generateImages);
     connect(ui->approveButton, &QPushButton::clicked, this, &MainWindow::approveSelectedGenerated);
     connect(ui->rejectButton, &QPushButton::clicked, this, &MainWindow::rejectSelectedGenerated);
+    connect(ui->showGeneratedMaskCheck, &QCheckBox::toggled, this, &MainWindow::onGeneratedSelected);
     connect(ui->exportButton, &QPushButton::clicked, this, &MainWindow::exportApprovedDataset);
     connect(ui->viewButton, &QPushButton::clicked, this, &MainWindow::setToolView);
     connect(ui->rectButton, &QPushButton::clicked, this, &MainWindow::setToolRect);
@@ -77,12 +78,12 @@ void MainWindow::setupConnections()
 
 void MainWindow::newProject()
 {
-    const QString dir = QFileDialog::getExistingDirectory(this, QStringLiteral("Select project directory"));
+    const QString dir = QFileDialog::getExistingDirectory(this, QString::fromUtf8(u8"\xE9\x80\x89\xE6\x8B\xA9\xE9\xA1\xB9\xE7\x9B\xAE\xE7\x9B\xAE\xE5\xBD\x95"));
     if (dir.isEmpty()) {
         return;
     }
     bool ok = false;
-    const QString productName = QInputDialog::getText(this, QStringLiteral("Product"), QStringLiteral("Product name"), QLineEdit::Normal, QStringLiteral("DefaultProduct"), &ok);
+    const QString productName = QInputDialog::getText(this, QString::fromUtf8(u8"\xE4\xBA\xA7\xE5\x93\x81"), QString::fromUtf8(u8"\xE4\xBA\xA7\xE5\x93\x81\xE5\x90\x8D\xE7\xA7\xB0"), QLineEdit::Normal, QString::fromUtf8(u8"\xE9\xBB\x98\xE8\xAE\xA4\xE4\xBA\xA7\xE5\x93\x81"), &ok);
     if (!ok) {
         return;
     }
@@ -100,12 +101,12 @@ void MainWindow::newProject()
     m_project = data;
     setProjectDir(dir);
     refreshProjectViews();
-    appendLog(QStringLiteral("Project created: %1").arg(dir));
+    appendLog(QString::fromUtf8(u8"\xE9\xA1\xB9\xE7\x9B\xAE\xE5\xB7\xB2\xE5\x88\x9B\xE5\xBB\xBA\x3A\x20%1").arg(dir));
 }
 
 void MainWindow::openProject()
 {
-    const QString dir = QFileDialog::getExistingDirectory(this, QStringLiteral("Open project directory"));
+    const QString dir = QFileDialog::getExistingDirectory(this, QString::fromUtf8(u8"\xE6\x89\x93\xE5\xBC\x80\xE9\xA1\xB9\xE7\x9B\xAE\xE7\x9B\xAE\xE5\xBD\x95"));
     if (dir.isEmpty()) {
         return;
     }
@@ -122,7 +123,7 @@ void MainWindow::openProject()
     for (const QString &line : validation) {
         Logger::instance().log(Logger::Warning, line);
     }
-    appendLog(QStringLiteral("Project opened: %1").arg(dir));
+    appendLog(QString::fromUtf8(u8"\xE9\xA1\xB9\xE7\x9B\xAE\xE5\xB7\xB2\xE6\x89\x93\xE5\xBC\x80\x3A\x20%1").arg(dir));
 }
 
 void MainWindow::importOkImages()
@@ -130,7 +131,7 @@ void MainWindow::importOkImages()
     if (!ensureProjectLoaded()) {
         return;
     }
-    const QStringList files = QFileDialog::getOpenFileNames(this, QStringLiteral("Import OK images"), QString(), QStringLiteral("Images (*.png *.jpg *.jpeg *.bmp)"));
+    const QStringList files = QFileDialog::getOpenFileNames(this, QString::fromUtf8(u8"\xE5\xAF\xBC\xE5\x85\xA5\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F"), QString(), QString::fromUtf8(u8"\xE5\x9B\xBE\xE5\x83\x8F\x20(*.png *.jpg *.jpeg *.bmp)"));
     if (files.isEmpty()) {
         return;
     }
@@ -151,7 +152,7 @@ void MainWindow::importDefectImages()
     if (!ensureProjectLoaded()) {
         return;
     }
-    const QStringList files = QFileDialog::getOpenFileNames(this, QStringLiteral("Import defect sources"), QString(), QStringLiteral("Images (*.png *.jpg *.jpeg *.bmp)"));
+    const QStringList files = QFileDialog::getOpenFileNames(this, QString::fromUtf8(u8"\xE5\xAF\xBC\xE5\x85\xA5\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE"), QString(), QString::fromUtf8(u8"\xE5\x9B\xBE\xE5\x83\x8F\x20(*.png *.jpg *.jpeg *.bmp)"));
     if (files.isEmpty()) {
         return;
     }
@@ -166,7 +167,7 @@ void MainWindow::importDefectImages()
         current.append(relativePath);
     }
     m_defectModel.setStringList(current);
-    appendLog(QStringLiteral("Imported %1 defect source image(s).").arg(files.size()));
+    appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\xAF\xBC\xE5\x85\xA5\x20%1\x20\xE5\xBC\xA0\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE").arg(files.size()));
 }
 
 void MainWindow::saveCurrentMaskAsAsset()
@@ -176,12 +177,12 @@ void MainWindow::saveCurrentMaskAsAsset()
     }
     const QString sourceRelative = currentDefectSourceRelativePath();
     if (sourceRelative.isEmpty()) {
-        showError(QStringLiteral("Select a defect source image first."));
+        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE"));
         return;
     }
     const QString defectType = ui->defectTypeEdit->text().trimmed();
     if (defectType.isEmpty()) {
-        showError(QStringLiteral("Defect type is empty."));
+        showError(QString::fromUtf8(u8"\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB1\xBB\xE5\x9E\x8B\xE4\xB8\xBA\xE7\xA9\xBA"));
         return;
     }
 
@@ -209,7 +210,7 @@ void MainWindow::saveCurrentMaskAsAsset()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QStringLiteral("Defect asset saved. Type=%1 Area=%2").arg(defectType).arg(area));
+        appendLog(QString::fromUtf8(u8"\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90\xE5\xB7\xB2\xE4\xBF\x9D\xE5\xAD\x98\x2E\x20\xE7\xB1\xBB\xE5\x9E\x8B=%1\x20\xE9\x9D\xA2\xE7\xA7\xAF=%2").arg(defectType).arg(area));
     }
 }
 
@@ -220,11 +221,11 @@ void MainWindow::generateImages()
     }
     const QString okPath = selectedOkImagePath();
     if (okPath.isEmpty()) {
-        showError(QStringLiteral("Select one OK image before generation."));
+        showError(QString::fromUtf8(u8"\xE7\x94\x9F\xE6\x88\x90\xE5\x89\x8D\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F"));
         return;
     }
     if (m_project.defectAssets.isEmpty()) {
-        showError(QStringLiteral("No defect assets available."));
+        showError(QString::fromUtf8(u8"\xE6\xB2\xA1\xE6\x9C\x89\xE5\x8F\xAF\xE7\x94\xA8\xE7\x9A\x84\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90"));
         return;
     }
 
@@ -236,23 +237,23 @@ void MainWindow::generateImages()
     request.defectsPerImageMax = ui->defectMaxSpin->value();
     request.seed = ui->seedSpin->value();
     if (request.defectsPerImageMax < request.defectsPerImageMin) {
-        showError(QStringLiteral("Defects max must be greater than or equal to defects min."));
+        showError(QString::fromUtf8(u8"\xE5\x8D\x95\xE5\x9B\xBE\xE7\xBC\xBA\xE9\x99\xB7\xE6\x95\xB0\xE6\x9C\x80\xE5\xA4\xA7\xE5\x80\xBC\xE5\xBF\x85\xE9\xA1\xBB\xE5\xA4\xA7\xE4\xBA\x8E\xE7\xAD\x89\xE4\xBA\x8E\xE6\x9C\x80\xE5\xB0\x8F\xE5\x80\xBC"));
         return;
     }
     if (ui->scaleMaxSpin->value() < ui->scaleMinSpin->value()) {
-        showError(QStringLiteral("Scale max must be greater than or equal to scale min."));
+        showError(QString::fromUtf8(u8"\xE7\xBC\xA9\xE6\x94\xBE\xE6\x9C\x80\xE5\xA4\xA7\xE5\x80\xBC\xE5\xBF\x85\xE9\xA1\xBB\xE5\xA4\xA7\xE4\xBA\x8E\xE7\xAD\x89\xE4\xBA\x8E\xE6\x9C\x80\xE5\xB0\x8F\xE5\x80\xBC"));
         return;
     }
     if (ui->rotationMaxSpin->value() < ui->rotationMinSpin->value()) {
-        showError(QStringLiteral("Rotation max must be greater than or equal to rotation min."));
+        showError(QString::fromUtf8(u8"\xE6\x97\x8B\xE8\xBD\xAC\xE6\x9C\x80\xE5\xA4\xA7\xE5\x80\xBC\xE5\xBF\x85\xE9\xA1\xBB\xE5\xA4\xA7\xE4\xBA\x8E\xE7\xAD\x89\xE4\xBA\x8E\xE6\x9C\x80\xE5\xB0\x8F\xE5\x80\xBC"));
         return;
     }
     if (ui->brightnessMaxSpin->value() < ui->brightnessMinSpin->value()) {
-        showError(QStringLiteral("Brightness max must be greater than or equal to brightness min."));
+        showError(QString::fromUtf8(u8"\xE4\xBA\xAE\xE5\xBA\xA6\xE6\x9C\x80\xE5\xA4\xA7\xE5\x80\xBC\xE5\xBF\x85\xE9\xA1\xBB\xE5\xA4\xA7\xE4\xBA\x8E\xE7\xAD\x89\xE4\xBA\x8E\xE6\x9C\x80\xE5\xB0\x8F\xE5\x80\xBC"));
         return;
     }
     if (ui->featherMaxSpin->value() < ui->featherMinSpin->value()) {
-        showError(QStringLiteral("Feather max must be greater than or equal to feather min."));
+        showError(QString::fromUtf8(u8"\xE7\xBE\xBD\xE5\x8C\x96\xE6\x9C\x80\xE5\xA4\xA7\xE5\x80\xBC\xE5\xBF\x85\xE9\xA1\xBB\xE5\xA4\xA7\xE4\xBA\x8E\xE7\xAD\x89\xE4\xBA\x8E\xE6\x9C\x80\xE5\xB0\x8F\xE5\x80\xBC"));
         return;
     }
     request.params.insert(QStringLiteral("scaleMin"), ui->scaleMinSpin->value());
@@ -265,18 +266,18 @@ void MainWindow::generateImages()
     request.params.insert(QStringLiteral("featherMax"), ui->featherMaxSpin->value());
     const QString selectedType = ui->generateTypeCombo->currentText();
     for (const DefectAssetRecord &asset : m_project.defectAssets) {
-        if (selectedType == QStringLiteral("All") || asset.defectType == selectedType) {
+        if (selectedType == QString::fromUtf8(u8"\xE5\x85\xA8\xE9\x83\xA8") || asset.defectType == selectedType) {
             request.defectAssetIds.append(asset.id);
         }
     }
     if (request.defectAssetIds.isEmpty()) {
-        showError(QStringLiteral("No defect assets match the selected defect type."));
+        showError(QString::fromUtf8(u8"\xE6\xB2\xA1\xE6\x9C\x89\xE5\x8C\xB9\xE9\x85\x8D\xE5\xBD\x93\xE5\x89\x8D\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB1\xBB\xE5\x9E\x8B\xE7\x9A\x84\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90"));
         return;
     }
 
     std::unique_ptr<IGenerationBackend> backend = BackendFactory::createBackend(QStringLiteral("OpenCV"));
     if (!backend) {
-        showError(QStringLiteral("OpenCV generation backend is unavailable."));
+        showError(QString::fromUtf8(u8"OpenCV \xE7\x94\x9F\xE6\x88\x90\xE5\x90\x8E\xE7\xAB\xAF\xE4\xB8\x8D\xE5\x8F\xAF\xE7\x94\xA8"));
         return;
     }
     setEnabled(false);
@@ -287,14 +288,14 @@ void MainWindow::generateImages()
         return;
     }
     refreshGeneratedList();
-    appendLog(QStringLiteral("Generation finished: %1 item(s).").arg(result.items.size()));
+    appendLog(QString::fromUtf8(u8"\xE7\x94\x9F\xE6\x88\x90\xE5\xAE\x8C\xE6\x88\x90\x3A\x20%1\x20\xE5\xBC\xA0").arg(result.items.size()));
 }
 
 void MainWindow::approveSelectedGenerated()
 {
     const QString path = selectedGeneratedPath();
     if (path.isEmpty()) {
-        showError(QStringLiteral("Select a generated image first."));
+        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\xE7\x94\x9F\xE6\x88\x90\xE5\x9B\xBE"));
         return;
     }
     moveReviewedFileSet(path, QStringLiteral("approved"));
@@ -305,7 +306,7 @@ void MainWindow::rejectSelectedGenerated()
 {
     const QString path = selectedGeneratedPath();
     if (path.isEmpty()) {
-        showError(QStringLiteral("Select a generated image first."));
+        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\xE7\x94\x9F\xE6\x88\x90\xE5\x9B\xBE"));
         return;
     }
     moveReviewedFileSet(path, QStringLiteral("rejected"));
@@ -317,7 +318,7 @@ void MainWindow::exportApprovedDataset()
     if (!ensureProjectLoaded()) {
         return;
     }
-    const QString outDir = QFileDialog::getExistingDirectory(this, QStringLiteral("Select export directory"));
+    const QString outDir = QFileDialog::getExistingDirectory(this, QString::fromUtf8(u8"\xE9\x80\x89\xE6\x8B\xA9\xE5\xAF\xBC\xE5\x87\xBA\xE7\x9B\xAE\xE5\xBD\x95"));
     if (outDir.isEmpty()) {
         return;
     }
@@ -339,17 +340,17 @@ void MainWindow::exportApprovedDataset()
         const QString dstMask = dir.filePath(QStringLiteral("masks/") + maskName);
         const QString dstMeta = dir.filePath(QStringLiteral("metadata/") + metaName);
         if (!QFile::copy(imageInfo.absoluteFilePath(), dstImage)) {
-            showError(QStringLiteral("Failed to export image: %1").arg(imageInfo.fileName()));
+            showError(QString::fromUtf8(u8"\xE5\xAF\xBC\xE5\x87\xBA\xE5\x9B\xBE\xE5\x83\x8F\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(imageInfo.fileName()));
             return;
         }
         const QString srcMask = approvedDir.filePath(maskName);
         if (!QFile::copy(srcMask, dstMask)) {
-            showError(QStringLiteral("Failed to export mask: %1").arg(maskName));
+            showError(QString::fromUtf8(u8"\xE5\xAF\xBC\xE5\x87\xBA\x20mask\x20\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(maskName));
             return;
         }
         const QString srcMeta = approvedDir.filePath(metaName);
         if (QFileInfo::exists(srcMeta) && !QFile::copy(srcMeta, dstMeta)) {
-            showError(QStringLiteral("Failed to export metadata: %1").arg(metaName));
+            showError(QString::fromUtf8(u8"\xE5\xAF\xBC\xE5\x87\xBA\x20metadata\x20\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(metaName));
             return;
         }
         QJsonObject item;
@@ -364,11 +365,11 @@ void MainWindow::exportApprovedDataset()
     dataset.insert(QStringLiteral("items"), items);
     QFile datasetFile(dir.filePath(QStringLiteral("dataset.json")));
     if (!datasetFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        showError(QStringLiteral("Failed to write dataset.json: %1").arg(datasetFile.errorString()));
+        showError(QString::fromUtf8(u8"\xE5\x86\x99\xE5\x85\xA5\x20dataset.json\x20\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(datasetFile.errorString()));
         return;
     }
     datasetFile.write(QJsonDocument(dataset).toJson(QJsonDocument::Indented));
-    appendLog(QStringLiteral("Exported approved dataset: %1 item(s).").arg(items.size()));
+    appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\xAF\xBC\xE5\x87\xBA\xE9\x80\x9A\xE8\xBF\x87\xE6\x95\xB0\xE6\x8D\xAE\xE9\x9B\x86\x3A\x20%1\x20\xE6\x9D\xA1").arg(items.size()));
 }
 
 void MainWindow::onOkImageSelected()
@@ -402,10 +403,12 @@ void MainWindow::onGeneratedSelected()
         if (!ui->imageView->loadImage(path, &error)) {
             showError(error);
         }
-        const QString maskPath = QFileInfo(path).absolutePath() + QDir::separator() + QFileInfo(path).completeBaseName() + QStringLiteral("_mask.png");
-        QImage mask(maskPath);
-        if (!mask.isNull()) {
-            ui->imageView->setMask(mask);
+        if (ui->showGeneratedMaskCheck->isChecked()) {
+            const QString maskPath = QFileInfo(path).absolutePath() + QDir::separator() + QFileInfo(path).completeBaseName() + QStringLiteral("_mask.png");
+            QImage mask(maskPath);
+            if (!mask.isNull()) {
+                ui->imageView->setMask(mask);
+            }
         }
     }
 }
@@ -420,9 +423,9 @@ void MainWindow::showOkContextMenu(const QPoint &pos)
         ui->okListView->setCurrentIndex(index);
     }
     QMenu menu(this);
-    QAction *deleteAction = menu.addAction(QStringLiteral("Delete Selected"));
+    QAction *deleteAction = menu.addAction(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE9\xA1\xB9"));
     deleteAction->setEnabled(ui->okListView->currentIndex().isValid());
-    QAction *clearAction = menu.addAction(QStringLiteral("Clear All"));
+    QAction *clearAction = menu.addAction(QString::fromUtf8(u8"\xE6\xB8\x85\xE7\xA9\xBA\xE5\x85\xA8\xE9\x83\xA8"));
     clearAction->setEnabled(!m_project.okImages.isEmpty());
     QAction *chosen = menu.exec(ui->okListView->viewport()->mapToGlobal(pos));
     if (chosen == deleteAction) {
@@ -442,9 +445,9 @@ void MainWindow::showDefectSourceContextMenu(const QPoint &pos)
         ui->defectListView->setCurrentIndex(index);
     }
     QMenu menu(this);
-    QAction *deleteAction = menu.addAction(QStringLiteral("Delete Selected"));
+    QAction *deleteAction = menu.addAction(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE9\xA1\xB9"));
     deleteAction->setEnabled(ui->defectListView->currentIndex().isValid());
-    QAction *clearAction = menu.addAction(QStringLiteral("Clear All"));
+    QAction *clearAction = menu.addAction(QString::fromUtf8(u8"\xE6\xB8\x85\xE7\xA9\xBA\xE5\x85\xA8\xE9\x83\xA8"));
     clearAction->setEnabled(!m_defectModel.stringList().isEmpty());
     QAction *chosen = menu.exec(ui->defectListView->viewport()->mapToGlobal(pos));
     if (chosen == deleteAction) {
@@ -464,9 +467,9 @@ void MainWindow::showAssetContextMenu(const QPoint &pos)
         ui->assetListView->setCurrentIndex(index);
     }
     QMenu menu(this);
-    QAction *deleteAction = menu.addAction(QStringLiteral("Delete Selected"));
+    QAction *deleteAction = menu.addAction(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE9\xA1\xB9"));
     deleteAction->setEnabled(ui->assetListView->currentIndex().isValid());
-    QAction *clearAction = menu.addAction(QStringLiteral("Clear All"));
+    QAction *clearAction = menu.addAction(QString::fromUtf8(u8"\xE6\xB8\x85\xE7\xA9\xBA\xE5\x85\xA8\xE9\x83\xA8"));
     clearAction->setEnabled(!m_project.defectAssets.isEmpty());
     QAction *chosen = menu.exec(ui->assetListView->viewport()->mapToGlobal(pos));
     if (chosen == deleteAction) {
@@ -486,9 +489,9 @@ void MainWindow::showGeneratedContextMenu(const QPoint &pos)
         ui->generatedListView->setCurrentIndex(index);
     }
     QMenu menu(this);
-    QAction *deleteAction = menu.addAction(QStringLiteral("Delete Selected"));
+    QAction *deleteAction = menu.addAction(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE9\xA1\xB9"));
     deleteAction->setEnabled(ui->generatedListView->currentIndex().isValid());
-    QAction *clearAction = menu.addAction(QStringLiteral("Clear All"));
+    QAction *clearAction = menu.addAction(QString::fromUtf8(u8"\xE6\xB8\x85\xE7\xA9\xBA\xE5\x85\xA8\xE9\x83\xA8"));
     clearAction->setEnabled(!m_generatedModel.stringList().isEmpty());
     QAction *chosen = menu.exec(ui->generatedListView->viewport()->mapToGlobal(pos));
     if (chosen == deleteAction) {
@@ -502,10 +505,10 @@ void MainWindow::deleteSelectedOkImage()
 {
     const int row = ui->okListView->currentIndex().row();
     if (row < 0 || row >= m_project.okImages.size()) {
-        showError(QStringLiteral("Select an OK image first."));
+        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F"));
         return;
     }
-    if (!confirmDelete(QStringLiteral("Delete selected OK image from project?"))) {
+    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F\xE5\x90\x97"))) {
         return;
     }
     QString error;
@@ -515,7 +518,7 @@ void MainWindow::deleteSelectedOkImage()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QStringLiteral("Deleted selected OK image."));
+        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F"));
     }
 }
 
@@ -524,7 +527,7 @@ void MainWindow::clearOkImages()
     if (m_project.okImages.isEmpty()) {
         return;
     }
-    if (!confirmDelete(QStringLiteral("Delete all OK images from this project?"))) {
+    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F\xE5\x90\x97"))) {
         return;
     }
     QString error;
@@ -536,7 +539,7 @@ void MainWindow::clearOkImages()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QStringLiteral("Deleted all OK images."));
+        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\x20OK\x20\xE5\x9B\xBE\xE5\x83\x8F"));
     }
 }
 
@@ -544,10 +547,10 @@ void MainWindow::deleteSelectedDefectSource()
 {
     const QString relativePath = currentDefectSourceRelativePath();
     if (relativePath.isEmpty()) {
-        showError(QStringLiteral("Select a defect source first."));
+        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE"));
         return;
     }
-    if (!confirmDelete(QStringLiteral("Delete selected defect source and its related assets?"))) {
+    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE\xE5\x8F\x8A\xE5\x85\xB3\xE8\x81\x94\xE7\xB4\xA0\xE6\x9D\x90\xE5\x90\x97"))) {
         return;
     }
     QString error;
@@ -557,7 +560,7 @@ void MainWindow::deleteSelectedDefectSource()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QStringLiteral("Deleted defect source: %1").arg(relativePath));
+        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE\x3A\x20%1").arg(relativePath));
     }
 }
 
@@ -567,7 +570,7 @@ void MainWindow::clearDefectSources()
     if (sources.isEmpty()) {
         return;
     }
-    if (!confirmDelete(QStringLiteral("Delete all defect sources and their related assets?"))) {
+    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE\xE5\x8F\x8A\xE5\x85\xB3\xE8\x81\x94\xE7\xB4\xA0\xE6\x9D\x90\xE5\x90\x97"))) {
         return;
     }
     QString error;
@@ -579,7 +582,7 @@ void MainWindow::clearDefectSources()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QStringLiteral("Deleted all defect sources."));
+        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE"));
     }
 }
 
@@ -587,10 +590,10 @@ void MainWindow::deleteSelectedAsset()
 {
     const int row = ui->assetListView->currentIndex().row();
     if (row < 0 || row >= m_project.defectAssets.size()) {
-        showError(QStringLiteral("Select a defect asset first."));
+        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE4\xB8\xAA\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90"));
         return;
     }
-    if (!confirmDelete(QStringLiteral("Delete selected defect asset?"))) {
+    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90\xE5\x90\x97"))) {
         return;
     }
     QString error;
@@ -600,7 +603,7 @@ void MainWindow::deleteSelectedAsset()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QStringLiteral("Deleted selected defect asset."));
+        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90"));
     }
 }
 
@@ -609,7 +612,7 @@ void MainWindow::clearAssets()
     if (m_project.defectAssets.isEmpty()) {
         return;
     }
-    if (!confirmDelete(QStringLiteral("Delete all defect assets? Defect source images will be kept."))) {
+    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90\xE5\x90\x97\x2E\x20\xE7\xBC\xBA\xE9\x99\xB7\xE6\xBA\x90\xE5\x9B\xBE\xE4\xBC\x9A\xE4\xBF\x9D\xE7\x95\x99"))) {
         return;
     }
     QString error;
@@ -621,7 +624,7 @@ void MainWindow::clearAssets()
     }
     if (saveProject()) {
         refreshProjectViews();
-        appendLog(QStringLiteral("Deleted all defect assets."));
+        appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90"));
     }
 }
 
@@ -629,10 +632,10 @@ void MainWindow::deleteSelectedGenerated()
 {
     const QString imagePath = selectedGeneratedPath();
     if (imagePath.isEmpty()) {
-        showError(QStringLiteral("Select a generated image first."));
+        showError(QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE9\x80\x89\xE6\x8B\xA9\xE4\xB8\x80\xE5\xBC\xA0\xE7\x94\x9F\xE6\x88\x90\xE5\x9B\xBE"));
         return;
     }
-    if (!confirmDelete(QStringLiteral("Delete selected generated image, mask and metadata?"))) {
+    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\xE7\x94\x9F\xE6\x88\x90\xE5\x9B\xBE\x20mask\x20\xE5\x92\x8C\x20metadata\x20\xE5\x90\x97"))) {
         return;
     }
     QString error;
@@ -641,7 +644,7 @@ void MainWindow::deleteSelectedGenerated()
         return;
     }
     refreshGeneratedList();
-    appendLog(QStringLiteral("Deleted selected generated item."));
+    appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE9\x80\x89\xE4\xB8\xAD\xE7\x9A\x84\xE7\x94\x9F\xE6\x88\x90\xE9\xA1\xB9"));
 }
 
 void MainWindow::clearGeneratedImages()
@@ -650,7 +653,7 @@ void MainWindow::clearGeneratedImages()
     if (images.isEmpty()) {
         return;
     }
-    if (!confirmDelete(QStringLiteral("Delete all generated images, masks and metadata?"))) {
+    if (!confirmDelete(QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\x94\x9F\xE6\x88\x90\xE5\x9B\xBE\x20mask\x20\xE5\x92\x8C\x20metadata\x20\xE5\x90\x97"))) {
         return;
     }
     QString error;
@@ -661,7 +664,7 @@ void MainWindow::clearGeneratedImages()
         }
     }
     refreshGeneratedList();
-    appendLog(QStringLiteral("Deleted all generated items."));
+    appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE5\x85\xA8\xE9\x83\xA8\xE7\x94\x9F\xE6\x88\x90\xE9\xA1\xB9"));
 }
 
 void MainWindow::setToolView()
@@ -696,7 +699,28 @@ void MainWindow::clearMask()
 
 void MainWindow::appendLog(const QString &line)
 {
-    ui->logEdit->appendPlainText(line);
+    QString displayLine = line;
+    const bool looksLikeUtf8Mojibake =
+        displayLine.contains(QChar(0x00C3)) ||
+        displayLine.contains(QChar(0x00E5)) ||
+        displayLine.contains(QChar(0x00E6)) ||
+        displayLine.contains(QChar(0x00E7)) ||
+        displayLine.contains(QChar(0x00E8)) ||
+        displayLine.contains(QChar(0x00E9));
+    if (looksLikeUtf8Mojibake) {
+        const QString repaired = QString::fromUtf8(displayLine.toLatin1());
+        bool hasCjk = false;
+        for (const QChar ch : repaired) {
+            if (ch.unicode() >= 0x4E00 && ch.unicode() <= 0x9FFF) {
+                hasCjk = true;
+                break;
+            }
+        }
+        if (hasCjk) {
+            displayLine = repaired;
+        }
+    }
+    ui->logEdit->appendPlainText(displayLine);
 }
 
 void MainWindow::refreshProjectViews()
@@ -709,7 +733,7 @@ void MainWindow::refreshProjectViews()
 
     QStringList assetItems;
     QStringList generateTypes;
-    generateTypes.append(QStringLiteral("All"));
+    generateTypes.append(QString::fromUtf8(u8"\xE5\x85\xA8\xE9\x83\xA8"));
     for (const DefectAssetRecord &asset : m_project.defectAssets) {
         assetItems.append(QStringLiteral("%1 | %2 | area=%3").arg(asset.id, asset.defectType).arg(asset.area));
         if (!generateTypes.contains(asset.defectType)) {
@@ -756,7 +780,7 @@ void MainWindow::refreshGeneratedList()
 bool MainWindow::ensureProjectLoaded() const
 {
     if (m_projectDir.isEmpty()) {
-        QMessageBox::warning(const_cast<MainWindow *>(this), QStringLiteral("No project"), QStringLiteral("Create or open a project first."));
+        QMessageBox::warning(const_cast<MainWindow *>(this), QString::fromUtf8(u8"\xE9\xA1\xB9\xE7\x9B\xAE"), QString::fromUtf8(u8"\xE8\xAF\xB7\xE5\x85\x88\xE5\x88\x9B\xE5\xBB\xBA\xE6\x88\x96\xE6\x89\x93\xE5\xBC\x80\xE9\xA1\xB9\xE7\x9B\xAE"));
         return false;
     }
     return true;
@@ -816,7 +840,7 @@ void MainWindow::setProjectDir(const QString &dir)
 void MainWindow::showError(const QString &message)
 {
     Logger::instance().log(Logger::Error, message);
-    QMessageBox::critical(this, QStringLiteral("Error"), message);
+    QMessageBox::critical(this, QString::fromUtf8(u8"\xE9\x94\x99\xE8\xAF\xAF"), message);
 }
 
 void MainWindow::moveReviewedFileSet(const QString &imagePath, const QString &targetSubDir)
@@ -824,7 +848,7 @@ void MainWindow::moveReviewedFileSet(const QString &imagePath, const QString &ta
     QDir projectDir(m_projectDir);
     QDir targetDir(projectDir.filePath(targetSubDir));
     if (!targetDir.exists() && !projectDir.mkpath(targetSubDir)) {
-        showError(QStringLiteral("Failed to create review directory: %1").arg(targetSubDir));
+        showError(QString::fromUtf8(u8"\xE5\x88\x9B\xE5\xBB\xBA\xE5\xAE\xA1\xE6\xA0\xB8\xE7\x9B\xAE\xE5\xBD\x95\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(targetSubDir));
         return;
     }
     QFileInfo imageInfo(imagePath);
@@ -836,27 +860,27 @@ void MainWindow::moveReviewedFileSet(const QString &imagePath, const QString &ta
     const QString targetMeta = targetDir.filePath(base + QStringLiteral(".json"));
 
     if (!QFileInfo::exists(maskPath)) {
-        showError(QStringLiteral("Generated mask is missing: %1").arg(maskPath));
+        showError(QString::fromUtf8(u8"\xE7\x94\x9F\xE6\x88\x90\x20mask\x20\xE7\xBC\xBA\xE5\xA4\xB1\x3A\x20%1").arg(maskPath));
         return;
     }
     if (!QFileInfo::exists(metaPath)) {
-        showError(QStringLiteral("Generated metadata is missing: %1").arg(metaPath));
+        showError(QString::fromUtf8(u8"\xE7\x94\x9F\xE6\x88\x90\x20metadata\x20\xE7\xBC\xBA\xE5\xA4\xB1\x3A\x20%1").arg(metaPath));
         return;
     }
 
     if (!QFile::rename(imagePath, targetImage)) {
-        showError(QStringLiteral("Failed to move image to %1").arg(targetSubDir));
+        showError(QString::fromUtf8(u8"\xE7\xA7\xBB\xE5\x8A\xA8\xE5\x9B\xBE\xE5\x83\x8F\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(targetSubDir));
         return;
     }
     if (!QFile::rename(maskPath, targetMask)) {
-        showError(QStringLiteral("Failed to move mask to %1").arg(targetSubDir));
+        showError(QString::fromUtf8(u8"\xE7\xA7\xBB\xE5\x8A\xA8\x20mask\x20\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(targetSubDir));
         return;
     }
     if (!QFile::rename(metaPath, targetMeta)) {
-        showError(QStringLiteral("Failed to move metadata to %1").arg(targetSubDir));
+        showError(QString::fromUtf8(u8"\xE7\xA7\xBB\xE5\x8A\xA8\x20metadata\x20\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1").arg(targetSubDir));
         return;
     }
-    appendLog(QStringLiteral("Moved generated item to %1: %2").arg(targetSubDir, base));
+    appendLog(QString::fromUtf8(u8"\xE5\xB7\xB2\xE7\xA7\xBB\xE5\x8A\xA8\xE7\x94\x9F\xE6\x88\x90\xE9\xA1\xB9\xE5\x88\xB0\x20%1\x3A\x20%2").arg(targetSubDir, base));
 }
 
 bool MainWindow::removeFileIfExists(const QString &path, QString *errorMessage)
@@ -867,11 +891,11 @@ bool MainWindow::removeFileIfExists(const QString &path, QString *errorMessage)
     QFile file(path);
     if (!file.remove()) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Failed to delete file: %1, %2").arg(path, file.errorString());
+            *errorMessage = QString::fromUtf8(u8"\xE5\x88\xA0\xE9\x99\xA4\xE6\x96\x87\xE4\xBB\xB6\xE5\xA4\xB1\xE8\xB4\xA5\x3A\x20%1\x2C\x20%2").arg(path, file.errorString());
         }
         return false;
     }
-    Logger::instance().log(Logger::Info, QStringLiteral("Deleted file: %1").arg(path));
+    Logger::instance().log(Logger::Info, QString::fromUtf8(u8"\xE5\xB7\xB2\xE5\x88\xA0\xE9\x99\xA4\xE6\x96\x87\xE4\xBB\xB6\x3A\x20%1").arg(path));
     return true;
 }
 
@@ -879,7 +903,7 @@ bool MainWindow::removeOkImageAt(int row, QString *errorMessage)
 {
     if (row < 0 || row >= m_project.okImages.size()) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("OK image index is invalid.");
+            *errorMessage = QString::fromUtf8(u8"OK \xE5\x9B\xBE\xE5\x83\x8F\xE7\xB4\xA2\xE5\xBC\x95\xE6\x97\xA0\xE6\x95\x88");
         }
         return false;
     }
@@ -899,7 +923,7 @@ bool MainWindow::removeAssetAt(int row, QString *errorMessage)
 {
     if (row < 0 || row >= m_project.defectAssets.size()) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Defect asset index is invalid.");
+            *errorMessage = QString::fromUtf8(u8"\xE7\xBC\xBA\xE9\x99\xB7\xE7\xB4\xA0\xE6\x9D\x90\xE7\xB4\xA2\xE5\xBC\x95\xE6\x97\xA0\xE6\x95\x88");
         }
         return false;
     }
@@ -941,7 +965,7 @@ bool MainWindow::removeGeneratedFileSet(const QString &imagePath, QString *error
 bool MainWindow::confirmDelete(const QString &message) const
 {
     return QMessageBox::question(const_cast<MainWindow *>(this),
-                                 QStringLiteral("Confirm delete"),
+                                 QString::fromUtf8(u8"\xE7\xA1\xAE\xE8\xAE\xA4\xE5\x88\xA0\xE9\x99\xA4"),
                                  message,
                                  QMessageBox::Yes | QMessageBox::No,
                                  QMessageBox::No) == QMessageBox::Yes;
