@@ -19,7 +19,11 @@ struct SdGenerateRequest
     int steps = 20;
     qint64 seed = 42;
     float cfgScale = 7.0f;
-    float strength = 0.75f;
+    float strength = 0.25f;
+    int maskEdgeWidth = 10;
+    int maskBlurRadius = 12;
+    bool inpaintOnlyMasked = true;
+    int maskedContentMode = 0;
     bool inpaint = false;
 };
 

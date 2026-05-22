@@ -44,6 +44,7 @@ ui_*.h
 /TestSDDemo/release/
 /TestSDDemo/outputs/
 /TestSDDemo/toolchains/
+/TestSDDemo/build.zip
 /TestSDDemo/ui_*.h
 
 *.safetensors

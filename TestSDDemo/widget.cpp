@@ -154,6 +154,10 @@ SdGenerateRequest Widget::makeBaseRequest(const QString &modelPath, bool inpaint
     request.seed = ui->seedSpin->value();
     request.cfgScale = float(ui->cfgSpin->value());
     request.strength = float(ui->strengthSpin->value());
+    request.maskEdgeWidth = ui->maskEdgeSpin->value();
+    request.maskBlurRadius = ui->maskBlurSpin->value();
+    request.inpaintOnlyMasked = ui->onlyMaskedCheck->isChecked();
+    request.maskedContentMode = ui->maskedContentCombo->currentIndex();
     request.inpaint = inpaint;
     return request;
 }

@@ -170,6 +170,410 @@ bool loadMaskImage(const QString &path, int expectedWidth, int expectedHeight, O
     return true;
 }
 
+QImage loadScaledRgbQImage(const QString &path, int expectedWidth, int expectedHeight, QString *errorMessage)
+{
+    QImage src(path);
+    if (src.isNull()) {
+        if (errorMessage) {
+            *errorMessage = QString(u8"加载图像失败: %1").arg(path);
+        }
+        return QImage();
+    }
+    if (src.width() != expectedWidth || src.height() != expectedHeight) {
+        src = src.scaled(expectedWidth, expectedHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+    return src.convertToFormat(QImage::Format_RGB888);
+}
+
+bool qImageToSdImage(const QImage &src, int channel, OwnedSdImage *outImage, QString *errorMessage)
+{
+    QImage converted;
+    if (channel == 3) {
+        converted = src.convertToFormat(QImage::Format_RGB888);
+    } else if (channel == 1) {
+        converted = src.convertToFormat(QImage::Format_Grayscale8);
+    } else {
+        if (errorMessage) {
+            *errorMessage = QString(u8"图像通道数不支持: %1").arg(channel);
+        }
+        return false;
+    }
+
+    sd_image_t image = {0, 0, 0, nullptr};
+    if (!allocImage(&image, converted.width(), converted.height(), channel, errorMessage)) {
+        return false;
+    }
+
+    const size_t rowBytes = size_t(converted.width()) * size_t(channel);
+    for (int y = 0; y < converted.height(); ++y) {
+        std::memcpy(image.data + size_t(y) * rowBytes, converted.constScanLine(y), rowBytes);
+    }
+
+    outImage->reset(image);
+    return true;
+}
+
+QImage sdImageToQImage(const sd_image_t &image, QString *errorMessage)
+{
+    if (!image.data || image.width == 0 || image.height == 0 || image.channel == 0) {
+        if (errorMessage) {
+            *errorMessage = QString(u8"生成图像为空.");
+        }
+        return QImage();
+    }
+
+    QImage out;
+    if (image.channel == 3) {
+        out = QImage(image.data,
+                     int(image.width),
+                     int(image.height),
+                     int(image.width * image.channel),
+                     QImage::Format_RGB888).copy();
+    } else if (image.channel == 4) {
+        out = QImage(image.data,
+                     int(image.width),
+                     int(image.height),
+                     int(image.width * image.channel),
+                     QImage::Format_RGBA8888).copy().convertToFormat(QImage::Format_RGB888);
+    } else if (image.channel == 1) {
+        out = QImage(image.data,
+                     int(image.width),
+                     int(image.height),
+                     int(image.width),
+                     QImage::Format_Grayscale8).copy().convertToFormat(QImage::Format_RGB888);
+    } else {
+        if (errorMessage) {
+            *errorMessage = QString(u8"生成图像通道数不支持: %1").arg(image.channel);
+        }
+        return QImage();
+    }
+
+    if (out.isNull() && errorMessage) {
+        *errorMessage = QString(u8"转换生成图像失败.");
+    }
+    return out;
+}
+
+QImage makeEdgeBandMask(const QImage &binaryMask, int radius)
+{
+    const QImage binary = binaryMask.convertToFormat(QImage::Format_Grayscale8);
+    if (radius <= 0) {
+        return binary;
+    }
+
+    const int width = binary.width();
+    const int height = binary.height();
+    std::vector<int> integral(size_t(width + 1) * size_t(height + 1), 0);
+
+    for (int y = 0; y < height; ++y) {
+        int rowSum = 0;
+        const uchar *line = binary.constScanLine(y);
+        for (int x = 0; x < width; ++x) {
+            rowSum += line[x] > 0 ? 1 : 0;
+            integral[size_t(y + 1) * size_t(width + 1) + size_t(x + 1)] =
+                integral[size_t(y) * size_t(width + 1) + size_t(x + 1)] + rowSum;
+        }
+    }
+
+    QImage edge(width, height, QImage::Format_Grayscale8);
+    for (int y = 0; y < height; ++y) {
+        uchar *dst = edge.scanLine(y);
+        const int y0 = std::max(0, y - radius);
+        const int y1 = std::min(height - 1, y + radius);
+        for (int x = 0; x < width; ++x) {
+            const int x0 = std::max(0, x - radius);
+            const int x1 = std::min(width - 1, x + radius);
+            const int count = integral[size_t(y1 + 1) * size_t(width + 1) + size_t(x1 + 1)]
+                            - integral[size_t(y0) * size_t(width + 1) + size_t(x1 + 1)]
+                            - integral[size_t(y1 + 1) * size_t(width + 1) + size_t(x0)]
+                            + integral[size_t(y0) * size_t(width + 1) + size_t(x0)];
+            const int area = (x1 - x0 + 1) * (y1 - y0 + 1);
+            dst[x] = (count > 0 && count < area) ? uchar(255) : uchar(0);
+        }
+    }
+    return edge;
+}
+
+QImage gaussianBlurMask(const QImage &mask, int radius)
+{
+    const QImage gray = mask.convertToFormat(QImage::Format_Grayscale8);
+    if (radius <= 0) {
+        return gray;
+    }
+
+    const int width = gray.width();
+    const int height = gray.height();
+    const double sigma = std::max(0.1, double(radius) / 3.0);
+    std::vector<double> kernel(size_t(radius * 2 + 1), 0.0);
+    double kernelSum = 0.0;
+    for (int i = -radius; i <= radius; ++i) {
+        const double value = std::exp(-(double(i * i)) / (2.0 * sigma * sigma));
+        kernel[size_t(i + radius)] = value;
+        kernelSum += value;
+    }
+    for (double &value : kernel) {
+        value /= kernelSum;
+    }
+
+    std::vector<float> temp(size_t(width) * size_t(height), 0.0f);
+    for (int y = 0; y < height; ++y) {
+        const uchar *line = gray.constScanLine(y);
+        for (int x = 0; x < width; ++x) {
+            double accum = 0.0;
+            for (int k = -radius; k <= radius; ++k) {
+                const int sx = std::min(width - 1, std::max(0, x + k));
+                accum += double(line[sx]) * kernel[size_t(k + radius)];
+            }
+            temp[size_t(y) * size_t(width) + size_t(x)] = float(accum);
+        }
+    }
+
+    QImage out(width, height, QImage::Format_Grayscale8);
+    for (int y = 0; y < height; ++y) {
+        uchar *dst = out.scanLine(y);
+        for (int x = 0; x < width; ++x) {
+            double accum = 0.0;
+            for (int k = -radius; k <= radius; ++k) {
+                const int sy = std::min(height - 1, std::max(0, y + k));
+                accum += double(temp[size_t(sy) * size_t(width) + size_t(x)]) * kernel[size_t(k + radius)];
+            }
+            dst[x] = uchar(std::min(255, std::max(0, int(std::round(accum)))));
+        }
+    }
+    return out;
+}
+
+QImage buildProcessedMask(const QString &path,
+                          int expectedWidth,
+                          int expectedHeight,
+                          int edgeWidth,
+                          int blurRadius,
+                          QString *errorMessage)
+{
+    QImage src(path);
+    if (src.isNull()) {
+        if (errorMessage) {
+            *errorMessage = QString(u8"加载 Mask 图失败: %1").arg(path);
+        }
+        return QImage();
+    }
+    if (src.width() != expectedWidth || src.height() != expectedHeight) {
+        src = src.scaled(expectedWidth, expectedHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+
+    const QImage gray = src.convertToFormat(QImage::Format_Grayscale8);
+    QImage binary(gray.width(), gray.height(), QImage::Format_Grayscale8);
+    int originalWhiteCount = 0;
+    for (int y = 0; y < gray.height(); ++y) {
+        const uchar *srcLine = gray.constScanLine(y);
+        uchar *dstLine = binary.scanLine(y);
+        for (int x = 0; x < gray.width(); ++x) {
+            const uchar value = srcLine[x] >= 128 ? uchar(255) : uchar(0);
+            dstLine[x] = value;
+            if (value == 255) {
+                ++originalWhiteCount;
+            }
+        }
+    }
+
+    if (originalWhiteCount <= 0) {
+        if (errorMessage) {
+            *errorMessage = QString(u8"Mask 二值化后没有白色修复区域: %1").arg(path);
+        }
+        return QImage();
+    }
+
+    QImage processed = makeEdgeBandMask(binary, edgeWidth);
+    int processedWhiteCount = 0;
+    for (int y = 0; y < processed.height(); ++y) {
+        const uchar *line = processed.constScanLine(y);
+        for (int x = 0; x < processed.width(); ++x) {
+            if (line[x] > 0) {
+                ++processedWhiteCount;
+            }
+        }
+    }
+
+    const int pixelCount = processed.width() * processed.height();
+    if (processedWhiteCount <= 0) {
+        if (errorMessage) {
+            *errorMessage = QString(u8"Mask 边缘环为空. 请增大 Mask 边缘宽度或检查 Mask 图: %1").arg(path);
+        }
+        return QImage();
+    }
+    if (processedWhiteCount >= pixelCount * 8 / 10) {
+        if (errorMessage) {
+            *errorMessage = QString(u8"Mask 修复区域过大. 请使用黑色背景和白色局部修复区域: %1").arg(path);
+        }
+        return QImage();
+    }
+
+    return gaussianBlurMask(processed, blurRadius);
+}
+
+QRect maskBoundingRect(const QImage &mask)
+{
+    const QImage gray = mask.convertToFormat(QImage::Format_Grayscale8);
+    int minX = gray.width();
+    int minY = gray.height();
+    int maxX = -1;
+    int maxY = -1;
+    for (int y = 0; y < gray.height(); ++y) {
+        const uchar *line = gray.constScanLine(y);
+        for (int x = 0; x < gray.width(); ++x) {
+            if (line[x] > 0) {
+                minX = std::min(minX, x);
+                minY = std::min(minY, y);
+                maxX = std::max(maxX, x);
+                maxY = std::max(maxY, y);
+            }
+        }
+    }
+    if (maxX < minX || maxY < minY) {
+        return QRect();
+    }
+    return QRect(QPoint(minX, minY), QPoint(maxX, maxY));
+}
+
+QRect expandedAspectRect(QRect rect, const QSize &bounds, int targetWidth, int targetHeight, int padding)
+{
+    rect = rect.adjusted(-padding, -padding, padding, padding);
+    rect = rect.intersected(QRect(QPoint(0, 0), bounds));
+    if (rect.isEmpty()) {
+        return QRect(QPoint(0, 0), bounds);
+    }
+
+    const double targetAspect = double(targetWidth) / double(targetHeight);
+    int newWidth = rect.width();
+    int newHeight = rect.height();
+    if (double(newWidth) / double(newHeight) < targetAspect) {
+        newWidth = int(std::ceil(double(newHeight) * targetAspect));
+    } else {
+        newHeight = int(std::ceil(double(newWidth) / targetAspect));
+    }
+    newWidth = std::min(newWidth, bounds.width());
+    newHeight = std::min(newHeight, bounds.height());
+
+    int cx = rect.center().x();
+    int cy = rect.center().y();
+    int x = cx - newWidth / 2;
+    int y = cy - newHeight / 2;
+    x = std::min(std::max(0, x), bounds.width() - newWidth);
+    y = std::min(std::max(0, y), bounds.height() - newHeight);
+    return QRect(x, y, newWidth, newHeight);
+}
+
+QImage composeWithMask(const QImage &baseImage,
+                       const QImage &generatedImage,
+                       const QImage &alphaMask,
+                       const QRect &targetRect,
+                       QString *errorMessage)
+{
+    if (baseImage.isNull() || generatedImage.isNull() || alphaMask.isNull() || targetRect.isEmpty()) {
+        if (errorMessage) {
+            *errorMessage = QString(u8"输出融合输入为空.");
+        }
+        return QImage();
+    }
+
+    QImage result = baseImage.convertToFormat(QImage::Format_RGB888);
+    const QImage generated = generatedImage.scaled(targetRect.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation).convertToFormat(QImage::Format_RGB888);
+    const QImage alpha = alphaMask.convertToFormat(QImage::Format_Grayscale8);
+
+    for (int y = 0; y < targetRect.height(); ++y) {
+        uchar *dstLine = result.scanLine(targetRect.y() + y) + targetRect.x() * 3;
+        const uchar *genLine = generated.constScanLine(y);
+        const uchar *alphaLine = alpha.constScanLine(targetRect.y() + y) + targetRect.x();
+        for (int x = 0; x < targetRect.width(); ++x) {
+            const int a = alphaLine[x];
+            if (a == 0) {
+                continue;
+            }
+            for (int c = 0; c < 3; ++c) {
+                const int baseValue = dstLine[x * 3 + c];
+                const int genValue = genLine[x * 3 + c];
+                dstLine[x * 3 + c] = uchar((baseValue * (255 - a) + genValue * a + 127) / 255);
+            }
+        }
+    }
+    return result;
+}
+
+struct PreparedInpaintImages
+{
+    OwnedSdImage initImage;
+    OwnedSdImage maskImage;
+    QImage baseImage;
+    QImage alphaMask;
+    QRect pasteRect;
+};
+
+bool prepareInpaintImages(const SdGenerateRequest &request, PreparedInpaintImages *prepared, QString *errorMessage)
+{
+    QImage baseImage = loadScaledRgbQImage(request.initImagePath, request.width, request.height, errorMessage);
+    if (baseImage.isNull()) {
+        return false;
+    }
+
+    QImage alphaMask = buildProcessedMask(request.maskImagePath,
+                                          request.width,
+                                          request.height,
+                                          request.maskEdgeWidth,
+                                          request.maskBlurRadius,
+                                          errorMessage);
+    if (alphaMask.isNull()) {
+        return false;
+    }
+
+    QRect pasteRect(QPoint(0, 0), baseImage.size());
+    QImage initForModel = baseImage;
+    QImage maskForModel = alphaMask;
+    if (request.inpaintOnlyMasked) {
+        QRect bounds = maskBoundingRect(alphaMask);
+        if (bounds.isEmpty()) {
+            if (errorMessage) {
+                *errorMessage = QString(u8"Only masked 区域为空. 请检查 Mask 图.");
+            }
+            return false;
+        }
+        const int padding = std::max(32, request.maskEdgeWidth + request.maskBlurRadius * 2 + 8);
+        pasteRect = expandedAspectRect(bounds, baseImage.size(), request.width, request.height, padding);
+        initForModel = baseImage.copy(pasteRect).scaled(request.width, request.height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        maskForModel = alphaMask.copy(pasteRect).scaled(request.width, request.height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+
+    if (!qImageToSdImage(initForModel, 3, &prepared->initImage, errorMessage)) {
+        return false;
+    }
+    if (!qImageToSdImage(maskForModel, 1, &prepared->maskImage, errorMessage)) {
+        return false;
+    }
+
+    prepared->baseImage = baseImage;
+    prepared->alphaMask = alphaMask;
+    prepared->pasteRect = pasteRect;
+    return true;
+}
+
+bool saveInpaintResult(const sd_image_t &image, const PreparedInpaintImages &prepared, const QString &path, QString *errorMessage)
+{
+    QImage generated = sdImageToQImage(image, errorMessage);
+    if (generated.isNull()) {
+        return false;
+    }
+    QImage composed = composeWithMask(prepared.baseImage, generated, prepared.alphaMask, prepared.pasteRect, errorMessage);
+    if (composed.isNull()) {
+        return false;
+    }
+    if (!composed.save(path, "PNG")) {
+        if (errorMessage) {
+            *errorMessage = QString(u8"保存输出图像失败: %1").arg(path);
+        }
+        return false;
+    }
+    return true;
+}
+
 bool saveSdImage(const sd_image_t &image, const QString &path, QString *errorMessage)
 {
     if (!image.data || image.width == 0 || image.height == 0 || image.channel == 0) {
@@ -310,15 +714,9 @@ SdGenerateResult StableDiffusionEngine::generate(const SdGenerateRequest &reques
         return result;
     }
 
-    OwnedSdImage initImage;
-    OwnedSdImage maskImage;
+    PreparedInpaintImages preparedInpaint;
     if (request.inpaint) {
-        if (!loadRgbImage(request.initImagePath, request.width, request.height, &initImage, &error)) {
-            result.errorMessage = error;
-            log(QString(u8"错误: %1").arg(error));
-            return result;
-        }
-        if (!loadMaskImage(request.maskImagePath, request.width, request.height, &maskImage, &error)) {
+        if (!prepareInpaintImages(request, &preparedInpaint, &error)) {
             result.errorMessage = error;
             log(QString(u8"错误: %1").arg(error));
             return result;
@@ -347,8 +745,8 @@ SdGenerateResult StableDiffusionEngine::generate(const SdGenerateRequest &reques
     params.vae_tiling_params.tile_size_y = 32;
 
     if (request.inpaint) {
-        params.init_image = initImage.image();
-        params.mask_image = maskImage.image();
+        params.init_image = preparedInpaint.initImage.image();
+        params.mask_image = preparedInpaint.maskImage.image();
     }
 
     log(QString(u8"开始生成. model=%1 size=%2x%3 steps=%4 seed=%5")
@@ -357,6 +755,13 @@ SdGenerateResult StableDiffusionEngine::generate(const SdGenerateRequest &reques
             .arg(request.height)
             .arg(request.steps)
             .arg(request.seed));
+    if (request.inpaint) {
+        log(QString(u8"Inpaint 参数. edge=%1 px blur=%2 px only_masked=%3 strength=%4")
+                .arg(request.maskEdgeWidth)
+                .arg(request.maskBlurRadius)
+                .arg(request.inpaintOnlyMasked ? QStringLiteral("true") : QStringLiteral("false"))
+                .arg(double(request.strength), 0, 'f', 2));
+    }
 
     s_callbackTarget = this;
     sd_set_log_callback(&StableDiffusionEngine::sdLogCallback, nullptr);
@@ -371,7 +776,10 @@ SdGenerateResult StableDiffusionEngine::generate(const SdGenerateRequest &reques
         return result;
     }
 
-    if (!saveSdImage(images[0], request.outputPath, &error)) {
+    const bool saved = request.inpaint
+        ? saveInpaintResult(images[0], preparedInpaint, request.outputPath, &error)
+        : saveSdImage(images[0], request.outputPath, &error);
+    if (!saved) {
         freeGeneratedImages(images, 1);
         result.errorMessage = error;
         log(QString(u8"错误: %1").arg(error));
@@ -419,6 +827,24 @@ bool StableDiffusionEngine::validateRequest(const SdGenerateRequest &request, QS
     if (request.outputPath.trimmed().isEmpty()) {
         if (errorMessage) {
             *errorMessage = QString(u8"输出路径为空.");
+        }
+        return false;
+    }
+    if (request.strength <= 0.0f || request.strength > 1.0f) {
+        if (errorMessage) {
+            *errorMessage = QString(u8"重绘强度必须在 (0, 1] 范围内.");
+        }
+        return false;
+    }
+    if (request.maskEdgeWidth < 0 || request.maskBlurRadius < 0) {
+        if (errorMessage) {
+            *errorMessage = QString(u8"Mask 边缘宽度和模糊半径不能小于 0.");
+        }
+        return false;
+    }
+    if (request.inpaint && request.maskedContentMode != 0) {
+        if (errorMessage) {
+            *errorMessage = QString(u8"masked content=latent noise 需要修改 stable-diffusion.cpp 并重编 DLL, 当前未启用.");
         }
         return false;
     }
